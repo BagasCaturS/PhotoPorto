@@ -65,12 +65,12 @@ export default function FeaturedSection({ photos }: Props) {
           <SliderContent>
             {photos.map((photo) => (
               <SliderWrapper key={photo.id} value={photo.id}>
-                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-muted dark:bg-dark-muted">
+                <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-900 sm:aspect-[16/9]">
                   <Image
                     src={photo.url}
                     alt={photo.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 1280px) 100vw, 1200px"
                   />
                 </div>

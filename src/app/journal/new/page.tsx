@@ -61,7 +61,7 @@ export default function NewJournalPage() {
     return publicUrl
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
 
@@ -79,8 +79,9 @@ export default function NewJournalPage() {
         content: content.split("\n").map((p) => p.trim()).filter(Boolean),
         coverSrc: coverUrl,
         tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        published: !asDraft,
       })
-      router.push(`/journal/${entry.slug}`)
+      router.push(asDraft ? "/admin" : `/journal/${entry.slug}`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create")
     } finally {
@@ -107,7 +108,7 @@ export default function NewJournalPage() {
 
             <div className="grid gap-12 lg:grid-cols-2">
               {/* ---- FORM ---- */}
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-8">
                 <div>
                   <label htmlFor="title" className="block font-mono text-sm font-medium mb-2">Title *</label>
                   <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required
@@ -163,8 +164,12 @@ export default function NewJournalPage() {
                     className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-foreground px-8 font-mono text-sm font-medium text-background transition-all duration-300 hover:bg-foreground/90 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background">
                     {saving ? "Publishing..." : "Publish Entry"}
                   </button>
+                  <button type="button" onClick={(e) => handleSubmit(e as unknown as React.FormEvent, true)} disabled={saving || !title.trim() || !content.trim()}
+                    className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full border border-border px-8 font-mono text-sm font-medium text-secondary transition-all duration-300 hover:bg-muted disabled:opacity-50 dark:border-dark-border dark:text-dark-secondary dark:hover:bg-dark-muted">
+                    {saving ? "Saving..." : "Save as Draft"}
+                  </button>
                   <button type="button" onClick={() => router.push("/journal")}
-                    className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full border border-border px-8 font-mono text-sm font-medium text-secondary transition-all duration-300 hover:bg-muted dark:border-dark-border dark:text-dark-secondary dark:hover:bg-dark-muted">
+                    className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full border border-border px-8 font-mono text-sm font-medium text-secondary/50 transition-all duration-300 hover:bg-muted dark:border-dark-border dark:text-dark-secondary/50 dark:hover:bg-dark-muted">
                     Cancel
                   </button>
                 </div>

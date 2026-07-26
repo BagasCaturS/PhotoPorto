@@ -5,7 +5,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ photos: 0, selected: 0, journals: 0 })
+  const [stats, setStats] = useState({ photos: 0, selected: 0, journals: 0, drafts: 0 })
 
   useEffect(() => {
     const fetch = async () => {
@@ -20,14 +20,21 @@ export default function AdminDashboard() {
       const { count: journals } = await supabase
         .from("journals")
         .select("*", { count: "exact", head: true })
+      const { count: drafts } = await supabase
+        .from("journals")
+        .select("*", { count: "exact", head: true })
+        .eq("published", false)
       setStats({
         photos: photos || 0,
         selected: selected || 0,
         journals: journals || 0,
+        drafts: drafts || 0,
       })
     }
     fetch()
   }, [])
+
+  const draftLabel = stats.drafts > 0 ? `${stats.journals - stats.drafts} published, ${stats.drafts} draft` : `${stats.journals} entries`
 
   return (
     <div className="grid gap-6 sm:grid-cols-3">
@@ -40,7 +47,7 @@ export default function AdminDashboard() {
         },
         {
           label: "Journal Entries",
-          value: stats.journals,
+          value: draftLabel,
           href: "/admin/journals",
         },
       ].map((card) => (

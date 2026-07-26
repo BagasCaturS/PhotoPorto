@@ -10,6 +10,7 @@ function mapEntry(raw: Record<string, unknown>): JournalEntry {
     date: (raw.date as string) || "",
     coverSrc: (raw.cover_src as string) || "",
     tags: (raw.tags as string[]) || [],
+    published: raw.published as boolean ?? true,
     created_at: raw.created_at as string | undefined,
   }
 }
@@ -30,10 +31,12 @@ export function fetchJournal(slug: string): Promise<JournalEntry> {
 export async function createJournal(
   data: Omit<JournalEntry, "id" | "slug" | "date" | "created_at" | "updated_at">
 ): Promise<JournalEntry> {
+  const { published, ...rest } = data
+  const body = published !== undefined ? { ...rest, published } : rest
   const res = await fetch("/api/journals", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const err = await res.json()

@@ -9,6 +9,7 @@ interface Journal {
   id: string
   slug: string
   title: string
+  published: boolean
   created_at: string
 }
 
@@ -20,7 +21,7 @@ export default function AdminJournals() {
     const supabase = createClient()
     const { data } = await supabase
       .from("journals")
-      .select("id, slug, title, created_at")
+      .select("id, slug, title, published, created_at")
       .order("created_at", { ascending: false })
     setJournals(data || [])
     setLoading(false)
@@ -70,24 +71,31 @@ export default function AdminJournals() {
               key={entry.id}
               className="flex items-center justify-between rounded-xl border border-border px-5 py-4 dark:border-dark-border"
             >
-              <div>
-                <Link
-                  href={`/journal/${entry.slug}`}
-                  className="font-sans text-lg font-semibold transition-colors hover:text-accent"
-                >
-                  {entry.title}
-                </Link>
-                <p className="font-mono text-xs text-secondary dark:text-dark-secondary">
-                  {new Date(entry.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
+              <div className="flex items-center gap-3">
+                <div>
+                  <Link
+                    href={`/journal/${entry.slug}`}
+                    className="font-sans text-lg font-semibold transition-colors hover:text-accent"
+                  >
+                    {entry.title}
+                  </Link>
+                  <p className="font-mono text-xs text-secondary dark:text-dark-secondary">
+                    {new Date(entry.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+                {!entry.published && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 px-2.5 py-0.5 font-mono text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                    Draft
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/journal/${entry.slug}`}
+                  href={`/journal/edit/${entry.id}`}
                   className="cursor-pointer rounded-xl border border-border p-2 transition-colors hover:bg-muted dark:border-dark-border dark:hover:bg-dark-muted"
                 >
                   <Pencil size={16} />

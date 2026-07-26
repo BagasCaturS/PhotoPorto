@@ -7,6 +7,7 @@ export interface JournalEntry {
   date: string
   coverSrc: string
   tags: string[]
+  published: boolean
   created_at?: string
 }
 

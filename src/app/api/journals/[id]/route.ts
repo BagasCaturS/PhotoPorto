@@ -7,11 +7,28 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const { data } = await supabase
-    .from("journals")
-    .select("*")
-    .eq("slug", id)
-    .single()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
+    isAdmin = profile?.role === "admin"
+  }
+
+  let query = supabase.from("journals").select("*").eq("slug", id)
+
+  if (!isAdmin) {
+    query = query.eq("published", true)
+  }
+
+  const { data } = await query.single()
 
   if (!data) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -45,16 +62,20 @@ export async function PUT(
   }
 
   const body = await request.json()
+  const updateData: Record<string, unknown> = {
+    title: body.title,
+    excerpt: body.excerpt,
+    content: body.content,
+    cover_src: body.coverSrc || body.cover_src,
+    tags: body.tags,
+    updated_at: new Date().toISOString(),
+  }
+  if (body.published !== undefined) {
+    updateData.published = body.published
+  }
   const { error } = await supabase
     .from("journals")
-    .update({
-      title: body.title,
-      excerpt: body.excerpt,
-      content: body.content,
-      cover_src: body.coverSrc || body.cover_src,
-      tags: body.tags,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("slug", id)
 
   if (error) {
