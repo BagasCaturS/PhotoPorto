@@ -94,7 +94,7 @@ export default function About() {
       <div className="border-t border-border pb-24 sm:pb-32 dark:border-dark-border">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-16 text-center">
-            <p className="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-4">
+            <p className="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-4 mt-4">
               Philosophy
             </p>
             <h2 className="font-sans text-3xl font-bold sm:text-4xl">

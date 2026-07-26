@@ -28,13 +28,22 @@ export default function AdminPhotos() {
   const batchFileRef = useRef<HTMLInputElement>(null)
 
   const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [singlePreview, setSinglePreview] = useState<string | null>(null)
   const [uploadTitle, setUploadTitle] = useState("")
   const [uploadDesc, setUploadDesc] = useState("")
   const [uploadCat, setUploadCat] = useState(CATEGORIES[0])
 
   const [batchFiles, setBatchFiles] = useState<File[]>([])
+  const [batchPreviews, setBatchPreviews] = useState<string[]>([])
   const [batchMeta, setBatchMeta] = useState<{ title: string; description: string; category: string }[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+
+  useEffect(() => {
+    return () => {
+      if (singlePreview) URL.revokeObjectURL(singlePreview)
+      batchPreviews.forEach((u) => URL.revokeObjectURL(u))
+    }
+  }, [])
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
@@ -66,6 +75,8 @@ export default function AdminPhotos() {
     await fetch("/api/photos", { method: "POST", body: formData })
     setUploading(false)
     setUploadFile(null)
+    if (singlePreview) URL.revokeObjectURL(singlePreview)
+    setSinglePreview(null)
     setUploadTitle("")
     setUploadDesc("")
     setUploadCat(CATEGORIES[0])
@@ -74,9 +85,17 @@ export default function AdminPhotos() {
     await fetchPhotos()
   }
 
+  const handleSingleFileSelected = (file: File | null) => {
+    if (singlePreview) URL.revokeObjectURL(singlePreview)
+    setUploadFile(file)
+    setSinglePreview(file ? URL.createObjectURL(file) : null)
+  }
+
   const handleBatchFilesSelected = (files: FileList | null) => {
+    batchPreviews.forEach((u) => URL.revokeObjectURL(u))
     const arr = Array.from(files || [])
     setBatchFiles(arr)
+    setBatchPreviews(arr.map((f) => URL.createObjectURL(f)))
     setBatchMeta(
       arr.map((f) => ({
         title: f.name.replace(/\.[^.]+$/, ""),
@@ -117,6 +136,8 @@ export default function AdminPhotos() {
     setUploading(false)
     setUploadProgress(0)
     setBatchFiles([])
+    batchPreviews.forEach((u) => URL.revokeObjectURL(u))
+    setBatchPreviews([])
     setBatchMeta([])
     if (batchFileRef.current) batchFileRef.current.value = ""
     setShowUpload(false)
@@ -248,7 +269,7 @@ export default function AdminPhotos() {
                     type="file"
                     accept="image/*"
                     required
-                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                    onChange={(e) => handleSingleFileSelected(e.target.files?.[0] || null)}
                     className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-foreground file:px-3 file:py-1 file:text-sm file:text-background dark:border-dark-border dark:file:bg-dark-foreground dark:file:text-dark-background"
                   />
                 </div>
@@ -283,6 +304,20 @@ export default function AdminPhotos() {
                   />
                 </div>
               </div>
+
+              {singlePreview && (
+                <div className="mt-4">
+                  <p className="mb-2 font-mono text-xs text-secondary dark:text-dark-secondary">Preview</p>
+                  <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded-lg bg-muted dark:bg-dark-muted">
+                    <img
+                      src={singlePreview}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={uploading || !uploadFile}
@@ -312,6 +347,7 @@ export default function AdminPhotos() {
                   <table className="w-full text-left font-mono text-sm">
                     <thead>
                       <tr className="border-b border-border text-xs text-secondary dark:border-dark-border dark:text-dark-secondary">
+                        <th className="px-3 py-2 font-medium">Preview</th>
                         <th className="px-3 py-2 font-medium">File</th>
                         <th className="px-3 py-2 font-medium">Title</th>
                         <th className="px-3 py-2 font-medium">Description</th>
@@ -321,7 +357,16 @@ export default function AdminPhotos() {
                     <tbody>
                       {batchFiles.map((f, i) => (
                         <tr key={i} className="border-b border-border last:border-b-0 dark:border-dark-border">
-                          <td className="max-w-[140px] truncate px-3 py-2 text-foreground/70 dark:text-dark-foreground/70">
+                          <td className="px-3 py-2">
+                            <div className="aspect-[4/3] w-16 overflow-hidden rounded-md bg-muted dark:bg-dark-muted">
+                              <img
+                                src={batchPreviews[i]}
+                                alt={f.name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          </td>
+                          <td className="max-w-[120px] truncate px-3 py-2 text-foreground/70 dark:text-dark-foreground/70">
                             {f.name}
                           </td>
                           <td className="px-3 py-1">
