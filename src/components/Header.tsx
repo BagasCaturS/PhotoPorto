@@ -9,7 +9,7 @@ function getNavLinks(pathname: string, isAdmin: boolean) {
   const isHome = pathname === "/"
   const links = [
     { label: "Gallery", href: isHome ? "#gallery" : "/#gallery" },
-    { label: "About", href: isHome ? "#about" : "/about" },
+    { label: "About", href: "/#about" },
     { label: "Journal", href: "/journal" },
     { label: "Contact", href: isHome ? "#contact" : "/#contact" },
   ]
