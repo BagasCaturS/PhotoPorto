@@ -3,7 +3,11 @@
 import { useEffect, useRef } from "react"
 import Image from "next/image"
 
-export default function Hero() {
+interface Props {
+  heroSrc?: string | null
+}
+
+export default function Hero({ heroSrc }: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,14 +25,18 @@ export default function Hero() {
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-foreground dark:bg-dark-foreground">
       <div ref={ref} className="absolute inset-0 will-change-transform">
-        <Image
-          src="/photography/_DSF0088.webp"
-          alt="Featured photography"
-          fill
-          className="object-cover opacity-60"
-          preload
-          sizes="100vw"
-        />
+        {heroSrc ? (
+          <Image
+            src={heroSrc}
+            alt="Featured photography"
+            fill
+            className="object-cover opacity-60"
+            preload
+            sizes="100vw"
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-neutral-800 to-neutral-900" />
+        )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/30 to-foreground dark:from-dark-foreground/60 dark:via-dark-foreground/30 dark:to-dark-foreground" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">

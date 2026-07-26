@@ -9,11 +9,18 @@ import { createClient } from "@/lib/supabase/server"
 
 export default async function Home() {
   const supabase = await createClient()
-  const { data } = await supabase
-    .from("photos")
-    .select("*")
-    .eq("selected", true)
-    .order("display_order", { ascending: true })
+
+  const [galleryResult, heroResult] = await Promise.all([
+    supabase
+      .from("photos")
+      .select("*")
+      .eq("selected", true)
+      .order("display_order", { ascending: true }),
+    supabase.from("photos").select("url").eq("is_hero", true).maybeSingle(),
+  ])
+
+  const data = galleryResult.data
+  const heroSrc = heroResult.data?.url || null
 
   let photos: Photo[] = fallbackPhotos
 
@@ -33,7 +40,7 @@ export default async function Home() {
     <>
       <Header />
       <main>
-        <Hero />
+        <Hero heroSrc={heroSrc} />
         <GalleryGrid photos={photos} categories={categories_all} />
         <About />
         <Contact />

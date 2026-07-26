@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Upload, Trash2, Check, X, Pencil, Save, Layers } from "lucide-react"
+import { Upload, Trash2, Check, X, Pencil, Save, Layers, Star } from "lucide-react"
 
 interface Photo {
   id: string
@@ -12,6 +12,7 @@ interface Photo {
   title: string
   description: string
   category: string
+  is_hero: boolean
 }
 
 const MAX_SELECTED = 30
@@ -165,6 +166,24 @@ export default function AdminPhotos() {
   }
 
   const selectedCount = photos.filter((p) => p.selected).length
+  const heroPhoto = photos.find((p) => p.is_hero)
+
+  const setHero = async (photo: Photo) => {
+    const body: Record<string, boolean> = { is_hero: true }
+    if (heroPhoto) {
+      await fetch(`/api/photos/${heroPhoto.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_hero: false }),
+      })
+    }
+    await fetch(`/api/photos/${photo.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    await fetchPhotos()
+  }
 
   if (loading) {
     return (
@@ -415,6 +434,17 @@ export default function AdminPhotos() {
                 </button>
                 <div className="flex gap-1">
                   <button
+                    onClick={() => setHero(photo)}
+                    className={`cursor-pointer rounded-full p-1.5 transition-colors ${
+                      photo.is_hero
+                        ? "bg-amber-500 text-white"
+                        : "bg-black/50 text-white hover:bg-amber-500"
+                    }`}
+                    title={photo.is_hero ? "Current hero" : "Set as hero background"}
+                  >
+                    <Star size={14} />
+                  </button>
+                  <button
                     onClick={() => startEdit(photo)}
                     className="cursor-pointer rounded-full bg-black/50 p-1.5 text-white transition-colors hover:bg-accent"
                     title="Edit"
@@ -431,11 +461,19 @@ export default function AdminPhotos() {
                 </div>
               </div>
 
-              {photo.selected && (
-                <div className="absolute bottom-2 left-2 rounded-full bg-accent px-2 py-0.5 font-mono text-xs text-white">
-                  Selected
-                </div>
-              )}
+              <div className="absolute bottom-2 left-2 flex gap-1.5">
+                {photo.selected && (
+                  <div className="rounded-full bg-accent px-2 py-0.5 font-mono text-xs text-white">
+                    Selected
+                  </div>
+                )}
+                {photo.is_hero && (
+                  <div className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 font-mono text-xs text-white">
+                    <Star size={10} />
+                    Hero
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
