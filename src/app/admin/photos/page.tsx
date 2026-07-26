@@ -13,9 +13,11 @@ interface Photo {
   description: string
   category: string
   is_hero: boolean
+  is_featured: boolean
 }
 
 const MAX_SELECTED = 30
+const MAX_FEATURED = 4
 const CATEGORIES = ["Portrait", "Landscape", "Street", "Architecture", "Nature", "Detail"]
 
 export default function AdminPhotos() {
@@ -187,7 +189,21 @@ export default function AdminPhotos() {
   }
 
   const selectedCount = photos.filter((p) => p.selected).length
+  const featuredCount = photos.filter((p) => p.is_featured).length
   const heroPhoto = photos.find((p) => p.is_hero)
+
+  const toggleFeatured = async (photo: Photo) => {
+    if (!photo.is_featured && featuredCount >= MAX_FEATURED) {
+      alert(`Maximum ${MAX_FEATURED} photos can be featured.`)
+      return
+    }
+    await fetch(`/api/photos/${photo.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_featured: !photo.is_featured }),
+    })
+    await fetchPhotos()
+  }
 
   const setHero = async (photo: Photo) => {
     const body: Record<string, boolean> = { is_hero: true }
@@ -220,7 +236,7 @@ export default function AdminPhotos() {
         <div>
           <h2 className="font-sans text-2xl font-bold">Photo Management</h2>
           <p className="mt-1 font-mono text-sm text-secondary dark:text-dark-secondary">
-            {selectedCount} / {MAX_SELECTED} selected — only selected photos appear on the gallery
+            {selectedCount} / {MAX_SELECTED} selected &middot; {featuredCount} / {MAX_FEATURED} featured
           </p>
         </div>
         <button
@@ -479,6 +495,17 @@ export default function AdminPhotos() {
                 </button>
                 <div className="flex gap-1">
                   <button
+                    onClick={() => toggleFeatured(photo)}
+                    className={`cursor-pointer rounded-full p-1.5 transition-colors ${
+                      photo.is_featured
+                        ? "bg-rose-500 text-white"
+                        : "bg-black/50 text-white hover:bg-rose-500"
+                    }`}
+                    title={photo.is_featured ? "Remove featured" : "Set as featured"}
+                  >
+                    <span className="text-xs font-bold leading-none">F</span>
+                  </button>
+                  <button
                     onClick={() => setHero(photo)}
                     className={`cursor-pointer rounded-full p-1.5 transition-colors ${
                       photo.is_hero
@@ -510,6 +537,11 @@ export default function AdminPhotos() {
                 {photo.selected && (
                   <div className="rounded-full bg-accent px-2 py-0.5 font-mono text-xs text-white">
                     Selected
+                  </div>
+                )}
+                {photo.is_featured && (
+                  <div className="inline-flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 font-mono text-xs text-white">
+                    Featured
                   </div>
                 )}
                 {photo.is_hero && (

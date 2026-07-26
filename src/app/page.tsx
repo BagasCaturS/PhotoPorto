@@ -1,6 +1,7 @@
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
 import GalleryGrid from "@/components/GalleryGrid"
+import FeaturedSection from "@/components/FeaturedSection"
 import About from "@/components/About"
 import Contact from "@/components/Contact"
 import Footer from "@/components/Footer"
@@ -10,17 +11,23 @@ import { createClient } from "@/lib/supabase/server"
 export default async function Home() {
   const supabase = await createClient()
 
-  const [galleryResult, heroResult] = await Promise.all([
+  const [galleryResult, heroResult, featuredResult] = await Promise.all([
     supabase
       .from("photos")
       .select("*")
       .eq("selected", true)
       .order("display_order", { ascending: true }),
     supabase.from("photos").select("url").eq("is_hero", true).maybeSingle(),
+    supabase
+      .from("photos")
+      .select("id, url, title, description")
+      .eq("is_featured", true)
+      .order("display_order", { ascending: true }),
   ])
 
   const data = galleryResult.data
   const heroSrc = heroResult.data?.url || null
+  const featuredData = featuredResult.data || []
 
   let photos: Photo[] = fallbackPhotos
 
@@ -42,6 +49,7 @@ export default async function Home() {
       <main>
         <Hero heroSrc={heroSrc} />
         <GalleryGrid photos={photos} categories={categories_all} />
+        <FeaturedSection photos={featuredData} />
         <About />
         <Contact />
       </main>
