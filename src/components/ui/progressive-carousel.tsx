@@ -175,9 +175,10 @@ export const SliderWrapper: FC<SliderWrapperProps> = ({
       {active === value && (
         <motion.div
           key={value}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0, scale: 0.93, filter: "blur(4px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, scale: 1.02, filter: "blur(4px)" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
           className={cn("", className)}
         >
           {children}
@@ -204,12 +205,15 @@ export const SliderBtn: FC<SliderBtnProps> = ({
     useProgressSliderContext()
 
   return (
-    <button
-      className={cn(
-        `relative ${active === value ? "opacity-100" : "opacity-50"}`,
-        className
-      )}
+    <motion.button
+      className={cn("relative", className)}
       onClick={() => handleButtonClick(value)}
+      animate={{
+        opacity: active === value ? 1 : 0.5,
+        scale: active === value ? 1 : 0.97,
+      }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ scale: 1.02, opacity: 1 }}
     >
       {children}
       <div
@@ -225,6 +229,6 @@ export const SliderBtn: FC<SliderBtnProps> = ({
           }}
         />
       </div>
-    </button>
+    </motion.button>
   )
 }
