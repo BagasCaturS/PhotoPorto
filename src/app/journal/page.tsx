@@ -8,6 +8,7 @@ import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { fetchJournals } from "@/lib/journal-api"
 import { Plus } from "lucide-react"
+import { JournalCardSkeleton } from "@/components/ui/skeleton"
 import type { JournalEntry } from "@/data/journal"
 
 const PER_PAGE = 4
@@ -65,7 +66,13 @@ export default function JournalPage() {
               )}
             </div>
 
-            {allEntries.length === 0 ? (
+            {!loaded ? (
+              <div className="grid gap-12">
+                {[1, 2, 3].map((i) => (
+                  <JournalCardSkeleton key={i} reverse={i % 2 === 0} />
+                ))}
+              </div>
+            ) : allEntries.length === 0 ? (
               <div className="py-20 text-center">
                 <p className="font-mono text-base text-secondary dark:text-dark-secondary">
                   No journal entries yet.

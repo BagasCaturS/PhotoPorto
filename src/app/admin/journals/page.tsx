@@ -95,7 +95,7 @@ export default function AdminJournals() {
               </div>
               <div className="flex items-center gap-2">
                 <Link
-                  href={`/journal/edit/${entry.id}`}
+                  href={`/journal/edit/${entry.slug}`}
                   className="cursor-pointer rounded-xl border border-border p-2 transition-colors hover:bg-muted dark:border-dark-border dark:hover:bg-dark-muted"
                 >
                   <Pencil size={16} />

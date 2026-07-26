@@ -9,6 +9,7 @@ import Footer from "@/components/Footer"
 import { fetchJournal, deleteJournal } from "@/lib/journal-api"
 import { useAuth } from "@/context/AuthContext"
 import { Pencil, Trash2 } from "lucide-react"
+import { ArticleSkeleton } from "@/components/ui/skeleton"
 import type { JournalEntry } from "@/data/journal"
 
 export default function JournalEntryPage() {
@@ -38,17 +39,7 @@ export default function JournalEntryPage() {
     return (
       <>
         <Header />
-        <main className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <h1 className="font-sans text-4xl font-bold">Entry Not Found</h1>
-            <Link
-              href="/journal"
-              className="mt-4 inline-flex font-mono text-sm text-accent hover:underline"
-            >
-              &larr; Back to Journal
-            </Link>
-          </div>
-        </main>
+        <ArticleSkeleton />
         <Footer />
       </>
     )
@@ -108,7 +99,7 @@ export default function JournalEntryPage() {
             {isAdmin && (
               <div className="mt-8 flex items-center gap-4 border-t border-border pt-6 dark:border-dark-border">
                 <Link
-                  href={`/journal/edit/${entry.id}`}
+                  href={`/journal/edit/${entry.slug}`}
                   className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 font-mono text-sm transition-colors hover:bg-muted dark:border-dark-border dark:hover:bg-dark-muted"
                 >
                   <Pencil size={14} />
