@@ -5,6 +5,7 @@ import FeaturedSection from "@/components/FeaturedSection"
 import About from "@/components/About"
 import Contact from "@/components/Contact"
 import Footer from "@/components/Footer"
+import SocialLinks from "@/components/ui/social-links"
 import { fallbackPhotos, categories_all, type Photo } from "@/data/photos"
 import { createClient } from "@/lib/supabase/server"
 import { getProxiedUrl } from "@/lib/utils"
@@ -59,6 +60,14 @@ export default async function Home() {
         <About />
         <Contact />
       </main>
+      <SocialLinks
+        links={[
+          { platform: "linkedin", href: "https://linkedin.com/in/your-profile" },
+          { platform: "instagram", href: "https://instagram.com/your-handle" },
+          { platform: "github", href: "https://github.com/your-username" },
+        ]}
+        floatingButtonColor="bg-zinc-800 dark:bg-zinc-700"
+      />
       <Footer />
     </>
   )
