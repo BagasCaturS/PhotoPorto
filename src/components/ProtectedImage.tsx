@@ -10,12 +10,10 @@ export default function ProtectedImage({
   ...props
 }: ImageProps & { containerClassName?: string }) {
   const isFill = props.fill === true
-  const isProxy = typeof props.src === "string" && props.src.startsWith("/api/images/")
   return (
     <div className={cn("relative select-none", isFill && "h-full w-full", containerClassName)}>
       <Image
         {...props}
-        unoptimized={isProxy || props.unoptimized}
         className={cn("pointer-events-none", className)}
         draggable={false}
         onContextMenu={(e) => e.preventDefault()}
