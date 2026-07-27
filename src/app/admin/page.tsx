@@ -3,38 +3,40 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ photos: 0, selected: 0, journals: 0, drafts: 0 })
+  const [stats, setStats] = useState<{
+    photos: number
+    selected: number
+    journals: number
+    drafts: number
+    loading: boolean
+  }>({ photos: 0, selected: 0, journals: 0, drafts: 0, loading: true })
 
   useEffect(() => {
     const fetch = async () => {
       const supabase = createClient()
-      const { count: photos } = await supabase
-        .from("photos")
-        .select("*", { count: "exact", head: true })
-      const { count: selected } = await supabase
-        .from("photos")
-        .select("*", { count: "exact", head: true })
-        .eq("selected", true)
-      const { count: journals } = await supabase
-        .from("journals")
-        .select("*", { count: "exact", head: true })
-      const { count: drafts } = await supabase
-        .from("journals")
-        .select("*", { count: "exact", head: true })
-        .eq("published", false)
+      const [photosRes, selectedRes, journalsRes, draftsRes] = await Promise.all([
+        supabase.from("photos").select("*", { count: "exact", head: true }),
+        supabase.from("photos").select("*", { count: "exact", head: true }).eq("selected", true),
+        supabase.from("journals").select("*", { count: "exact", head: true }),
+        supabase.from("journals").select("*", { count: "exact", head: true }).eq("published", false),
+      ])
       setStats({
-        photos: photos || 0,
-        selected: selected || 0,
-        journals: journals || 0,
-        drafts: drafts || 0,
+        photos: photosRes.count || 0,
+        selected: selectedRes.count || 0,
+        journals: journalsRes.count || 0,
+        drafts: draftsRes.count || 0,
+        loading: false,
       })
     }
     fetch()
   }, [])
 
-  const draftLabel = stats.drafts > 0 ? `${stats.journals - stats.drafts} published, ${stats.drafts} draft` : `${stats.journals} entries`
+  const draftLabel = stats.drafts > 0
+    ? `${stats.journals - stats.drafts} published, ${stats.drafts} draft`
+    : `${stats.journals} entries`
 
   return (
     <div className="grid gap-6 sm:grid-cols-3">
@@ -59,7 +61,11 @@ export default function AdminDashboard() {
           <p className="font-mono text-sm text-secondary dark:text-dark-secondary">
             {card.label}
           </p>
-          <p className="mt-2 font-sans text-3xl font-bold">{card.value}</p>
+          {stats.loading ? (
+            <Skeleton className="mt-2 h-8 w-24" />
+          ) : (
+            <p className="mt-2 font-sans text-3xl font-bold">{card.value}</p>
+          )}
         </Link>
       ))}
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Pencil, Trash2 } from "lucide-react"
@@ -17,7 +17,7 @@ export default function AdminJournals() {
   const [journals, setJournals] = useState<Journal[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchJournals = async () => {
+  const fetchJournals = useCallback(async () => {
     const supabase = createClient()
     const { data } = await supabase
       .from("journals")
@@ -25,17 +25,23 @@ export default function AdminJournals() {
       .order("created_at", { ascending: false })
     setJournals(data || [])
     setLoading(false)
-  }
+  }, [])
 
   useEffect(() => {
     fetchJournals()
-  }, [])
+  }, [fetchJournals])
 
-  const handleDelete = async (slug: string) => {
+  const handleDelete = useCallback(async (slug: string) => {
     if (!confirm("Delete this entry?")) return
-    await fetch(`/api/journals/${slug}`, { method: "DELETE" })
-    await fetchJournals()
-  }
+
+    setJournals((prev) => prev.filter((j) => j.slug !== slug))
+
+    const res = await fetch(`/api/journals/${slug}`, { method: "DELETE" })
+
+    if (!res.ok) {
+      await fetchJournals()
+    }
+  }, [fetchJournals])
 
   if (loading) {
     return (
