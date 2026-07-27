@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
-import { Upload, LayoutList } from "lucide-react"
+import { Upload, LayoutList, Shuffle } from "lucide-react"
 import Link from "next/link"
 import type { Photo } from "@/components/admin/types"
 import { MAX_SELECTED, MAX_FEATURED } from "@/components/admin/types"
@@ -178,42 +178,49 @@ export default function AdminPhotos() {
     }
   }, [showToast])
 
-  const randomSelectPhotos = useCallback(async () => {
+  const randomAll = useCallback(async () => {
     const allPhotos = photosRef.current
+    if (allPhotos.length === 0) return
 
-    let targetIds: Set<string>
-    if (allPhotos.length <= MAX_SELECTED) {
-      targetIds = new Set(allPhotos.map((p) => p.id))
-    } else {
-      const shuffled = [...allPhotos].sort(() => Math.random() - 0.5)
-      targetIds = new Set(shuffled.slice(0, MAX_SELECTED).map((p) => p.id))
-    }
+    const shuffled = [...allPhotos].sort(() => Math.random() - 0.5)
 
-    const changed = allPhotos.filter((p) => p.selected !== targetIds.has(p.id))
-    if (changed.length === 0) return
+    const selectedTargets = new Set(
+      shuffled.slice(0, Math.min(MAX_SELECTED, allPhotos.length)).map((p) => p.id)
+    )
+    const featuredTargets = new Set(
+      shuffled.slice(0, Math.min(MAX_FEATURED, allPhotos.length)).map((p) => p.id)
+    )
+    const heroTarget = allPhotos[Math.floor(Math.random() * allPhotos.length)]
 
     setPhotos((prev) =>
-      prev.map((p) => ({ ...p, selected: targetIds.has(p.id) }))
+      prev.map((p) => ({
+        ...p,
+        selected: selectedTargets.has(p.id),
+        is_featured: featuredTargets.has(p.id),
+        is_hero: p.id === heroTarget.id,
+      }))
     )
 
-    const results = await Promise.allSettled(
-      changed.map((p) =>
-        fetch(`/api/photos/${p.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ selected: targetIds.has(p.id) }),
-        })
-      )
+    const changes = allPhotos.map((p) =>
+      fetch(`/api/photos/${p.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          selected: selectedTargets.has(p.id),
+          is_featured: featuredTargets.has(p.id),
+          is_hero: p.id === heroTarget.id,
+        }),
+      })
     )
-
+    const results = await Promise.allSettled(changes)
     const failed = results.some(
       (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
     )
     if (failed) {
       await fetchPhotos()
-      showToast("Random selection failed.", "error")
+      showToast("Random assignment failed.", "error")
     } else {
-      showToast(`${targetIds.size} photos randomly selected.`)
+      showToast("Gallery, featured & hero randomly assigned.")
     }
   }, [fetchPhotos, showToast])
 
@@ -246,7 +253,7 @@ export default function AdminPhotos() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-sans text-2xl font-bold">Photos</h2>
           <p className="mt-1 font-mono text-xs text-secondary dark:text-dark-secondary">
@@ -273,6 +280,16 @@ export default function AdminPhotos() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <button
+          onClick={randomAll}
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 px-4 py-2 font-mono text-xs text-secondary transition-colors hover:border-accent hover:text-accent dark:border-dark-border/60 dark:text-dark-secondary dark:hover:border-dark-accent dark:hover:text-dark-accent"
+        >
+          <Shuffle size={14} />
+          Acak Semua
+        </button>
+      </div>
+
       <PhotoGrid
         photos={photos}
         loading={loading}
@@ -281,7 +298,6 @@ export default function AdminPhotos() {
         onSetHero={setHero}
         onEdit={startEdit}
         onDelete={handleDelete}
-        onRandomSelect={randomSelectPhotos}
         onClearSelection={clearSelection}
       />
 

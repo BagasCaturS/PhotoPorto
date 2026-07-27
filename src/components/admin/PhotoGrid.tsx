@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Shuffle, X } from "lucide-react"
+import { X } from "lucide-react"
 import PhotoCard from "./PhotoCard"
 import type { Photo } from "./types"
 import { MAX_SELECTED } from "./types"
@@ -12,7 +12,6 @@ interface Props {
   onSetHero: (photo: Photo) => void
   onEdit: (photo: Photo) => void
   onDelete: (photo: Photo) => void
-  onRandomSelect?: () => void
   onClearSelection?: () => void
 }
 
@@ -31,7 +30,7 @@ function SkeletonCard() {
 export default function PhotoGrid({
   photos, loading,
   onToggleSelect, onToggleFeatured, onSetHero, onEdit, onDelete,
-  onRandomSelect, onClearSelection,
+  onClearSelection,
 }: Props) {
   const selectedCount = useMemo(() => photos.filter((p) => p.selected).length, [photos])
   const featuredCount = useMemo(() => photos.filter((p) => p.is_featured).length, [photos])
@@ -88,16 +87,6 @@ export default function PhotoGrid({
             </button>
           )}
         </div>
-        {onRandomSelect && (
-          <button
-            onClick={onRandomSelect}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1 font-mono text-[11px] text-secondary transition-colors hover:border-accent hover:text-accent dark:border-dark-border/60 dark:text-dark-secondary dark:hover:border-dark-accent dark:hover:text-dark-accent"
-            title="Pilih 30 foto secara acak"
-          >
-            <Shuffle size={12} />
-            Pilih Acak
-          </button>
-        )}
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {photos.map((photo) => (
