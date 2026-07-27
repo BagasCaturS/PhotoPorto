@@ -74,7 +74,8 @@ Browser → <ProtectedImage> (right-click/drag prevention)
 | Task | Status | File |
 |------|--------|------|
 | Edge caching (`s-maxage` + `stale-while-revalidate`) di proxy | ✅ | `src/app/api/images/[...path]/route.ts` |
-| Supabase Imgix transformation di proxy (resize 1200px + WebP + q80) | ✅ | `src/app/api/images/[...path]/route.ts` |
+| Supabase Imgix transformation di proxy — **rollback** (free tier 100MB limit) | ✅ | `src/app/api/images/[...path]/route.ts` |
+| `minimumCacheTTL: 3600` + `formats` di next.config.ts | ✅ | `next.config.ts` |
 | ISR homepage (`revalidate = 3600`) | ✅ | `src/app/page.tsx` |
 | Placeholder background (CSS shimmer) di gallery images | ✅ | `src/components/GalleryGrid.tsx` (already had `bg-muted`) |
 | **Verification:** `npm run build` zero errors | ✅ | — |
@@ -86,10 +87,11 @@ Browser → <ProtectedImage> (right-click/drag prevention)
 - Vercel Edge CDN cache 24 jam, serve stale sambil revalidate di background
 - Efek: kunjungan ke-2+ langsung dari edge, <50ms tanpa cold start
 
-**Task 2 — Supabase Imgix transformation**
-- `serveFromSupabase()`: sebelum fetch Supabase URL, append `?width=1200&format=webp&quality=80`
-- Supabase punya Imgix built-in — resize + convert di edge mereka
-- Efek: download dari Supabase turun dari 2-5MB → ~100KB per gambar
+**Task 2 — next/image optimisation + cache**
+- `next.config.ts`: `minimumCacheTTL: 3600` — next/image simpan optimized image di cache minimal 1 jam
+- `next.config.ts`: `formats: ["image/avif", "image/webp"]` — next/image otomatis konversi ke format modern
+- Imgix di-rollback karena free tier hanya 100MB/bulan — gampang habis
+- Efek: optimized image (resize + WebP/AVIF) di-cache Vercel Edge selama 1 jam, gratis
 
 **Task 3 — ISR homepage**
 - `export const revalidate = 3600` di `src/app/page.tsx`

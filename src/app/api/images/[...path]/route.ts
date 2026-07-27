@@ -31,26 +31,15 @@ async function serveFromSupabase(storagePath: string): Promise<NextResponse> {
     .from("photos")
     .createSignedUrl(storagePath, 60)
 
-  let sourceUrl: string
-
   if (!data?.signedUrl) {
     const { data: pub } = supabase.storage.from("photos").getPublicUrl(storagePath)
     if (!pub?.publicUrl) {
       return new NextResponse("Not Found", { status: 404 })
     }
-    sourceUrl = pub.publicUrl
-  } else {
-    sourceUrl = data.signedUrl
+    return fetchAndRespond(pub.publicUrl)
   }
 
-  sourceUrl = addImageTransform(sourceUrl)
-  return fetchAndRespond(sourceUrl)
-}
-
-function addImageTransform(url: string): string {
-  const params = new URLSearchParams({ width: "1200", format: "webp", quality: "80" })
-  const separator = url.includes("?") ? "&" : "?"
-  return `${url}${separator}${params.toString()}`
+  return fetchAndRespond(data.signedUrl)
 }
 
 async function serveFromLocal(localPath: string): Promise<NextResponse> {
