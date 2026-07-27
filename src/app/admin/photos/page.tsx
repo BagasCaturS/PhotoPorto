@@ -1,20 +1,30 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
-import { Upload, Shuffle } from "lucide-react"
+import { Upload } from "lucide-react"
 import type { Photo } from "@/components/admin/types"
 import { MAX_SELECTED, MAX_FEATURED } from "@/components/admin/types"
 import PhotoGrid from "@/components/admin/PhotoGrid"
 import UploadForm from "@/components/admin/UploadForm"
 import EditModal from "@/components/admin/EditModal"
 
+type Toast = { message: string; type: "success" | "error" } | null
+
 export default function AdminPhotos() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
   const [showUpload, setShowUpload] = useState(false)
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null)
+  const [toast, setToast] = useState<Toast>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const photosRef = useRef(photos)
   photosRef.current = photos
+
+  const showToast = useCallback((message: string, type: "success" | "error" = "success") => {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setToast({ message, type })
+    toastTimer.current = setTimeout(() => setToast(null), 3000)
+  }, [])
 
   const fetchPhotos = useCallback(async () => {
     const res = await fetch("/api/photos")
@@ -28,11 +38,12 @@ export default function AdminPhotos() {
   }, [fetchPhotos])
 
   const heroPhoto = useMemo(() => photos.find((p) => p.is_hero), [photos])
+  const totalCount = photos.length
 
   const toggleSelected = useCallback(async (photo: Photo) => {
     const currentSelected = photosRef.current.filter((p) => p.selected).length
     if (!photo.selected && currentSelected >= MAX_SELECTED) {
-      alert(`Maximum ${MAX_SELECTED} photos can be selected.`)
+      showToast(`Maximum ${MAX_SELECTED} photos can be selected.`, "error")
       return
     }
 
@@ -54,13 +65,14 @@ export default function AdminPhotos() {
           p.id === photo.id ? { ...p, selected: photo.selected } : p
         )
       )
+      showToast("Failed to update selection.", "error")
     }
-  }, [])
+  }, [showToast])
 
   const toggleFeatured = useCallback(async (photo: Photo) => {
     const currentFeatured = photosRef.current.filter((p) => p.is_featured).length
     if (!photo.is_featured && currentFeatured >= MAX_FEATURED) {
-      alert(`Maximum ${MAX_FEATURED} photos can be featured.`)
+      showToast(`Maximum ${MAX_FEATURED} photos can be featured.`, "error")
       return
     }
 
@@ -82,8 +94,9 @@ export default function AdminPhotos() {
           p.id === photo.id ? { ...p, is_featured: photo.is_featured } : p
         )
       )
+      showToast("Failed to update featured.", "error")
     }
-  }, [])
+  }, [showToast])
 
   const setHero = useCallback(async (photo: Photo) => {
     const previousHero = photosRef.current.find((p) => p.is_hero)
@@ -116,8 +129,11 @@ export default function AdminPhotos() {
           p.id === photo.id ? { ...p, is_hero: false } : p
         )
       )
+      showToast("Failed to update hero.", "error")
+    } else {
+      showToast("Hero photo updated.")
     }
-  }, [])
+  }, [showToast])
 
   const startEdit = useCallback((photo: Photo) => {
     setEditingPhoto(photo)
@@ -139,28 +155,34 @@ export default function AdminPhotos() {
 
     if (!res.ok) {
       await fetchPhotos()
+      showToast("Failed to save changes.", "error")
+    } else {
+      showToast("Photo updated.")
     }
-  }, [fetchPhotos])
+  }, [fetchPhotos, showToast])
 
   const cancelEdit = useCallback(() => {
     setEditingPhoto(null)
   }, [])
 
   const handleDelete = useCallback(async (photo: Photo) => {
-    if (!confirm(`Delete "${photo.title || photo.filename}"?`)) return
+    const deleted = photo
 
     setPhotos((prev) => prev.filter((p) => p.id !== photo.id))
+    showToast("Photo deleted.")
 
     const res = await fetch(`/api/photos/${photo.id}`, { method: "DELETE" })
 
     if (!res.ok) {
-      setPhotos((prev) => [...prev, photo])
+      setPhotos((prev) => [...prev, deleted])
+      showToast("Failed to delete.", "error")
     }
-  }, [])
+  }, [showToast])
 
   const handleUploadComplete = useCallback(async () => {
     await fetchPhotos()
-  }, [fetchPhotos])
+    showToast("Upload complete.")
+  }, [fetchPhotos, showToast])
 
   const randomSelectPhotos = useCallback(async () => {
     const allPhotos = photosRef.current
@@ -195,28 +217,55 @@ export default function AdminPhotos() {
     )
     if (failed) {
       await fetchPhotos()
+      showToast("Random selection failed.", "error")
+    } else {
+      showToast(`${targetIds.size} photos randomly selected.`)
     }
-  }, [fetchPhotos])
+  }, [fetchPhotos, showToast])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
-      </div>
+  const clearSelection = useCallback(async () => {
+    const selected = photosRef.current.filter((p) => p.selected)
+    if (selected.length === 0) return
+
+    setPhotos((prev) => prev.map((p) => ({ ...p, selected: false })))
+
+    const results = await Promise.allSettled(
+      selected.map((p) =>
+        fetch(`/api/photos/${p.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ selected: false }),
+        })
+      )
     )
-  }
+
+    const failed = results.some(
+      (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
+    )
+    if (failed) {
+      await fetchPhotos()
+      showToast("Failed to clear selection.", "error")
+    } else {
+      showToast("Selection cleared.")
+    }
+  }, [fetchPhotos, showToast])
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-sans text-2xl font-bold">Photo Management</h2>
+          <h2 className="font-sans text-2xl font-bold">Photos</h2>
+          <p className="mt-1 font-mono text-xs text-secondary dark:text-dark-secondary">
+            {totalCount} photo{totalCount !== 1 ? "s" : ""} in library ·{" "}
+            {photos.filter((p) => p.selected).length} selected ·{" "}
+            {photos.filter((p) => p.is_featured).length} featured
+          </p>
         </div>
         <button
           onClick={() => setShowUpload(!showUpload)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-3 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 dark:bg-dark-foreground dark:text-dark-background"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 dark:bg-dark-foreground dark:text-dark-background"
         >
-          <Upload size={16} />
+          <Upload size={15} />
           {showUpload ? "Cancel" : "Upload Photo"}
         </button>
       </div>
@@ -225,12 +274,14 @@ export default function AdminPhotos() {
 
       <PhotoGrid
         photos={photos}
+        loading={loading}
         onToggleSelect={toggleSelected}
         onToggleFeatured={toggleFeatured}
         onSetHero={setHero}
         onEdit={startEdit}
         onDelete={handleDelete}
         onRandomSelect={randomSelectPhotos}
+        onClearSelection={clearSelection}
       />
 
       <EditModal
@@ -238,6 +289,18 @@ export default function AdminPhotos() {
         onSave={saveEdit}
         onCancel={cancelEdit}
       />
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border px-5 py-2.5 font-mono text-sm shadow-lg backdrop-blur-md transition-all duration-300 ${
+            toast.type === "error"
+              ? "border-destructive/30 bg-destructive/10 text-destructive"
+              : "border-border/60 bg-background/80 text-foreground dark:border-dark-border/60 dark:bg-dark-background/80 dark:text-dark-foreground"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   )
 }

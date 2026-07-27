@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react"
-import { Upload, Layers, X } from "lucide-react"
+import { Upload, Layers, X, FileImage } from "lucide-react"
 import { CATEGORIES } from "./types"
 
 interface Props {
@@ -110,7 +110,7 @@ export default function UploadForm({ onUploadComplete }: Props) {
   }, [batchFiles, batchMeta, batchPreviews, onUploadComplete])
 
   return (
-    <div className="mb-8 rounded-xl border border-border dark:border-dark-border">
+    <div className="mb-8 overflow-hidden rounded-xl border border-border dark:border-dark-border">
       <div className="flex border-b border-border dark:border-dark-border">
         <button
           onClick={() => setUploadMode("single")}
@@ -121,7 +121,7 @@ export default function UploadForm({ onUploadComplete }: Props) {
           }`}
         >
           <Upload size={14} />
-          Single Upload
+          Single
         </button>
         <button
           onClick={() => setUploadMode("batch")}
@@ -132,64 +132,84 @@ export default function UploadForm({ onUploadComplete }: Props) {
           }`}
         >
           <Layers size={14} />
-          Batch Upload
+          Batch
         </button>
       </div>
 
       {uploadMode === "single" ? (
-        <form onSubmit={handleSingleUpload} className="p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSingleUpload} className="space-y-5 p-6">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+                File
+              </label>
+              <div className="flex items-center gap-3">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-secondary transition-colors hover:border-accent hover:text-accent dark:border-dark-border dark:text-dark-secondary dark:hover:border-dark-accent dark:hover:text-dark-accent">
+                  <FileImage size={16} />
+                  <span className="font-mono">Choose image</span>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={(e) => handleSingleFileSelected(e.target.files?.[0] || null)}
+                    className="sr-only"
+                  />
+                </label>
+                {uploadFile && (
+                  <span className="font-mono text-xs text-secondary dark:text-dark-secondary">
+                    {uploadFile.name}
+                  </span>
+                )}
+              </div>
+            </div>
             <div>
-              <label className="mb-1 block font-mono text-xs text-secondary dark:text-dark-secondary">File</label>
+              <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+                Title
+              </label>
               <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => handleSingleFileSelected(e.target.files?.[0] || null)}
-                className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-foreground file:px-3 file:py-1 file:text-sm file:text-background dark:border-dark-border dark:file:bg-dark-foreground dark:file:text-dark-background"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="Photo title"
+                className="w-full rounded-lg border border-border bg-transparent px-3.5 py-2.5 font-mono text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
               />
             </div>
             <div>
-              <label className="mb-1 block font-mono text-xs text-secondary dark:text-dark-secondary">Category</label>
+              <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+                Category
+              </label>
               <select
                 value={uploadCat}
                 onChange={(e) => setUploadCat(e.target.value)}
-                className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm dark:border-dark-border"
+                className="w-full rounded-lg border border-border bg-transparent px-3.5 py-2.5 font-mono text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="mb-1 block font-mono text-xs text-secondary dark:text-dark-secondary">Title</label>
-              <input
-                value={uploadTitle}
-                onChange={(e) => setUploadTitle(e.target.value)}
-                placeholder="Photo title"
-                className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm dark:border-dark-border"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block font-mono text-xs text-secondary dark:text-dark-secondary">Description</label>
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+                Description
+              </label>
               <input
                 value={uploadDesc}
                 onChange={(e) => setUploadDesc(e.target.value)}
                 placeholder="A brief description..."
-                className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm dark:border-dark-border"
+                className="w-full rounded-lg border border-border bg-transparent px-3.5 py-2.5 font-mono text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
               />
             </div>
           </div>
 
           {singlePreview && (
-            <div className="mt-4">
-              <p className="mb-2 font-mono text-xs text-secondary dark:text-dark-secondary">Preview</p>
+            <div>
+              <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+                Preview
+              </p>
               <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded-lg bg-muted dark:bg-dark-muted">
                 <img
                   src={singlePreview}
                   alt="Preview"
-                  loading="lazy"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -199,76 +219,82 @@ export default function UploadForm({ onUploadComplete }: Props) {
           <button
             type="submit"
             disabled={uploading || !uploadFile}
-            className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background"
           >
             <Upload size={14} />
-            {uploading ? "Uploading..." : "Upload to Gallery"}
+            {uploading ? "Uploading..." : "Upload to gallery"}
           </button>
         </form>
       ) : (
         <form onSubmit={handleBatchUpload} className="p-6">
-          <div className="mb-4">
-            <label className="mb-1 block font-mono text-xs text-secondary dark:text-dark-secondary">Select multiple images</label>
-            <input
-              ref={batchFileRef}
-              type="file"
-              accept="image/*"
-              multiple
-              required
-              onChange={(e) => handleBatchFilesSelected(e.target.files)}
-              className="w-full rounded-lg border border-border bg-transparent px-3 py-2 font-mono text-sm file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-foreground file:px-3 file:py-1 file:text-sm file:text-background dark:border-dark-border dark:file:bg-dark-foreground dark:file:text-dark-background"
-            />
+          <div className="mb-5">
+            <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-secondary dark:text-dark-secondary">
+              Select multiple images
+            </label>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-secondary transition-colors hover:border-accent hover:text-accent dark:border-dark-border dark:text-dark-secondary dark:hover:border-dark-accent dark:hover:text-dark-accent">
+              <Layers size={16} />
+              <span className="font-mono">Choose files</span>
+              <input
+                ref={batchFileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                required
+                onChange={(e) => handleBatchFilesSelected(e.target.files)}
+                className="sr-only"
+              />
+            </label>
+            {batchFiles.length > 0 && (
+              <p className="mt-1.5 font-mono text-xs text-secondary dark:text-dark-secondary">
+                {batchFiles.length} file{batchFiles.length !== 1 ? "s" : ""} selected
+              </p>
+            )}
           </div>
 
           {batchFiles.length > 0 && (
-            <div className="mb-4 overflow-x-auto rounded-lg border border-border dark:border-dark-border">
+            <div className="mb-5 overflow-x-auto rounded-lg border border-border dark:border-dark-border">
               <table className="w-full text-left font-mono text-sm">
                 <thead>
-                  <tr className="border-b border-border text-xs text-secondary dark:border-dark-border dark:text-dark-secondary">
-                    <th className="px-3 py-2 font-medium">Preview</th>
-                    <th className="px-3 py-2 font-medium">File</th>
-                    <th className="px-3 py-2 font-medium">Title</th>
-                    <th className="px-3 py-2 font-medium">Description</th>
-                    <th className="px-3 py-2 font-medium">Category</th>
+                  <tr className="border-b border-border text-[11px] text-secondary dark:border-dark-border dark:text-dark-secondary">
+                    <th className="px-3 py-2.5 font-medium">Preview</th>
+                    <th className="px-3 py-2.5 font-medium">Title</th>
+                    <th className="px-3 py-2.5 font-medium">Description</th>
+                    <th className="px-3 py-2.5 font-medium">Category</th>
                   </tr>
                 </thead>
                 <tbody>
                   {batchFiles.map((f, i) => (
                     <tr key={f.name + f.lastModified} className="border-b border-border last:border-b-0 dark:border-dark-border">
                       <td className="px-3 py-2">
-                        <div className="aspect-[4/3] w-16 overflow-hidden rounded-md bg-muted dark:bg-dark-muted">
+                        <div className="aspect-[4/3] w-14 overflow-hidden rounded-md bg-muted dark:bg-dark-muted">
                           <img
                             src={batchPreviews[i]}
                             alt={f.name}
-                            loading="lazy"
                             className="h-full w-full object-cover"
                           />
                         </div>
                       </td>
-                      <td className="max-w-[120px] truncate px-3 py-2 text-foreground/70 dark:text-dark-foreground/70">
-                        {f.name}
-                      </td>
-                      <td className="px-3 py-1">
+                      <td className="px-3 py-2">
                         <input
                           value={batchMeta[i]?.title || ""}
                           onChange={(e) => updateBatchMeta(i, "title", e.target.value)}
                           placeholder="Title"
-                          className="w-full min-w-[120px] rounded border border-border bg-transparent px-2 py-1 text-sm dark:border-dark-border"
+                          className="w-full min-w-[120px] rounded border border-border bg-transparent px-2 py-1 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
                         />
                       </td>
-                      <td className="px-3 py-1">
+                      <td className="px-3 py-2">
                         <input
                           value={batchMeta[i]?.description || ""}
                           onChange={(e) => updateBatchMeta(i, "description", e.target.value)}
                           placeholder="Description"
-                          className="w-full min-w-[160px] rounded border border-border bg-transparent px-2 py-1 text-sm dark:border-dark-border"
+                          className="w-full min-w-[140px] rounded border border-border bg-transparent px-2 py-1 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
                         />
                       </td>
-                      <td className="px-3 py-1">
+                      <td className="px-3 py-2">
                         <select
                           value={batchMeta[i]?.category || CATEGORIES[0]}
                           onChange={(e) => updateBatchMeta(i, "category", e.target.value)}
-                          className="w-full min-w-[120px] rounded border border-border bg-transparent px-2 py-1 text-sm dark:border-dark-border"
+                          className="w-full min-w-[120px] rounded border border-border bg-transparent px-2 py-1 text-sm transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent dark:focus:ring-dark-accent"
                         >
                           {CATEGORIES.map((c) => (
                             <option key={c} value={c}>{c}</option>
@@ -283,12 +309,12 @@ export default function UploadForm({ onUploadComplete }: Props) {
           )}
 
           {uploading && (
-            <div className="mb-4">
-              <div className="mb-1 flex justify-between font-mono text-xs text-secondary dark:text-dark-secondary">
+            <div className="mb-5">
+              <div className="mb-2 flex justify-between font-mono text-xs text-secondary dark:text-dark-secondary">
                 <span>Uploading... {uploadProgress}%</span>
                 <span>{Math.round(batchFiles.length * (uploadProgress / 100))} of {batchFiles.length}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted dark:bg-dark-muted">
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted dark:bg-dark-muted">
                 <div
                   className="h-full rounded-full bg-accent transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
@@ -300,10 +326,10 @@ export default function UploadForm({ onUploadComplete }: Props) {
           <button
             type="submit"
             disabled={uploading || batchFiles.length === 0}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background"
           >
             <Layers size={14} />
-            {uploading ? "Uploading..." : `Upload All ${batchFiles.length} Files`}
+            {uploading ? "Uploading..." : `Upload all ${batchFiles.length} files`}
           </button>
         </form>
       )}
