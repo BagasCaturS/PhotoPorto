@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import type { Photo } from "@/data/photos"
 import Lightbox from "./Lightbox"
 import ProtectedImage from "./ProtectedImage"
@@ -13,6 +13,17 @@ interface GalleryGridProps {
 export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
   const [activeCategory, setActiveCategory] = useState<string>("All")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const loadedRef = useRef<Set<string>>(new Set())
+  const [, forceRender] = useState(0)
+
+  const markLoaded = useCallback((id: string) => {
+    if (loadedRef.current.has(id)) return
+    loadedRef.current = new Set(loadedRef.current)
+    loadedRef.current.add(id)
+    forceRender((n) => n + 1)
+  }, [])
+
+  const isLoaded = useCallback((id: string) => loadedRef.current.has(id), [])
 
   const filtered =
     activeCategory === "All"
@@ -76,9 +87,14 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
                   alt={photo.title}
                   width={photo.width}
                   height={photo.height}
-                  className="h-auto w-full object-cover transition-all duration-700 group-hover:scale-105"
+                  className={`h-auto w-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                    isLoaded(photo.id)
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-3 opacity-0"
+                  }`}
                   preload={i < 3}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  onLoad={() => markLoaded(photo.id)}
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/80 p-6 text-center opacity-0 transition-opacity duration-400 group-hover:opacity-100 dark:bg-black/80">
                   <h3 className="font-sans text-xl font-bold text-white">
