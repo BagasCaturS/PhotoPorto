@@ -44,6 +44,7 @@ export default function AdminLayout({
               { label: "Dashboard", href: "/admin" },
               { label: "Photos", href: "/admin/photos" },
               { label: "Journals", href: "/admin/journals" },
+              { label: "Messages", href: "/admin/messages" },
             ].map((item) => (
               <Link
                 key={item.href}

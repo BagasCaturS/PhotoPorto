@@ -1,12 +1,18 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Send } from "lucide-react"
+import { Send, Loader2 } from "lucide-react"
 
 export default function Contact() {
   const ref = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
+
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const el = ref.current
@@ -24,9 +30,30 @@ export default function Contact() {
     return () => observer.disconnect()
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSent(true)
+    setError(null)
+    setSending(true)
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message")
+      }
+
+      setSent(true)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -64,7 +91,7 @@ export default function Contact() {
           }`}
         >
           {sent ? (
-            <div className="rounded-2xl bg-muted dark:bg-dark-muted p-12 text-center">
+            <div className="rounded-2xl bg-muted p-12 text-center dark:bg-dark-muted">
               <p className="font-sans text-xl font-semibold">
                 Message Sent
               </p>
@@ -86,6 +113,8 @@ export default function Contact() {
                     type="text"
                     id="name"
                     required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full rounded-xl border border-border bg-transparent px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent"
                     placeholder="Your name"
                   />
@@ -101,6 +130,8 @@ export default function Contact() {
                     type="email"
                     id="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-xl border border-border bg-transparent px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent"
                     placeholder="your@email.com"
                   />
@@ -117,16 +148,28 @@ export default function Contact() {
                   id="message"
                   required
                   rows={5}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   className="w-full resize-none rounded-xl border border-border bg-transparent px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent"
                   placeholder="Tell me about your project..."
                 />
               </div>
+
+              {error && (
+                <p className="font-mono text-sm text-destructive">{error}</p>
+              )}
+
               <button
                 type="submit"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-8 py-3 font-mono text-sm font-medium text-background transition-all duration-300 hover:bg-foreground/90 hover:scale-105 dark:bg-dark-foreground dark:text-dark-background dark:hover:bg-dark-foreground/90"
+                disabled={sending}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-8 py-3 font-mono text-sm font-medium text-background transition-all duration-300 hover:bg-foreground/90 hover:scale-105 disabled:opacity-50 dark:bg-dark-foreground dark:text-dark-background dark:hover:bg-dark-foreground/90"
               >
-                <Send size={16} />
-                Send Message
+                {sending ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Send size={16} />
+                )}
+                {sending ? "Sending..." : "Send Message"}
               </button>
             </>
           )}
