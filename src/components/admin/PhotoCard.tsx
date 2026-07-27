@@ -1,5 +1,6 @@
 import { memo } from "react"
 import { Check, X, Star, Pencil, Trash2 } from "lucide-react"
+import { getThumbUrl } from "@/lib/utils"
 import type { Photo } from "./types"
 
 interface Props {
@@ -22,7 +23,7 @@ function PhotoCard({ photo, onToggleSelect, onToggleFeatured, onSetHero, onEdit,
     >
       <div className="aspect-[4/3] overflow-hidden bg-muted dark:bg-dark-muted">
         <img
-          src={photo.url}
+          src={getThumbUrl(photo.url)}
           alt={photo.title || photo.filename}
           loading="lazy"
           decoding="async"
