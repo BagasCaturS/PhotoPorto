@@ -22,7 +22,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "localhost",
+        pathname: "/api/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "photo-porto-sigma.vercel.app",
         pathname: "/api/images/**",
       },
     ],
