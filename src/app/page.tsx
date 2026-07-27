@@ -62,9 +62,9 @@ export default async function Home() {
       </main>
       <SocialLinks
         links={[
-          { platform: "linkedin", href: "https://linkedin.com/in/your-profile" },
-          { platform: "instagram", href: "https://instagram.com/your-handle" },
-          { platform: "github", href: "https://github.com/your-username" },
+          { platform: "linkedin", href: "https://www.linkedin.com/in/web-bagascaturs/" },
+          { platform: "instagram", href: "https://www.instagram.com/idont_do_art/" },
+          { platform: "github", href: "https://github.com/BagasCaturS" },
         ]}
         floatingButtonColor="bg-zinc-800 dark:bg-zinc-700"
       />
