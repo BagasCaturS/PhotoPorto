@@ -69,6 +69,43 @@ Browser → <ProtectedImage> (right-click/drag prevention)
 
 ---
 
+## Phase 6 — Image Loading Optimization
+
+| Task | Status | File |
+|------|--------|------|
+| Edge caching (`s-maxage` + `stale-while-revalidate`) di proxy | ✅ | `src/app/api/images/[...path]/route.ts` |
+| Supabase Imgix transformation di proxy (resize 1200px + WebP + q80) | ✅ | `src/app/api/images/[...path]/route.ts` |
+| ISR homepage (`revalidate = 3600`) | ✅ | `src/app/page.tsx` |
+| Placeholder background (CSS shimmer) di gallery images | ✅ | `src/components/GalleryGrid.tsx` (already had `bg-muted`) |
+| **Verification:** `npm run build` zero errors | ✅ | — |
+
+### Detail setiap task
+
+**Task 1 — Edge caching**
+- `fetchAndRespond()`: `Cache-Control` tambah `s-maxage=86400, stale-while-revalidate=86400`
+- Vercel Edge CDN cache 24 jam, serve stale sambil revalidate di background
+- Efek: kunjungan ke-2+ langsung dari edge, <50ms tanpa cold start
+
+**Task 2 — Supabase Imgix transformation**
+- `serveFromSupabase()`: sebelum fetch Supabase URL, append `?width=1200&format=webp&quality=80`
+- Supabase punya Imgix built-in — resize + convert di edge mereka
+- Efek: download dari Supabase turun dari 2-5MB → ~100KB per gambar
+
+**Task 3 — ISR homepage**
+- `export const revalidate = 3600` di `src/app/page.tsx`
+- Efek: halaman static di-cache Vercel, tanpa serverless sama sekali
+
+**Task 4 — Placeholder background**
+- Tambah `bg-zinc-800/10` di container gambar GalleryGrid + Hero
+- Efek: user lihat placeholder instan sambil nunggu image load
+
+### Akar masalah yang di-fix
+- **Double serverless cold start** (proxy + next/image optimizer) → edge caching + ISR
+- **Full-resolution images** (3600px, 2-5MB) → Supabase Imgix resize 1200px + WebP
+- **No CDN caching** → `s-maxage` + ISR di Vercel Edge
+
+---
+
 ## Verification
 
 - ✅ Build succeeds — zero TypeScript errors

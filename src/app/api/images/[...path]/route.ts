@@ -31,15 +31,26 @@ async function serveFromSupabase(storagePath: string): Promise<NextResponse> {
     .from("photos")
     .createSignedUrl(storagePath, 60)
 
+  let sourceUrl: string
+
   if (!data?.signedUrl) {
     const { data: pub } = supabase.storage.from("photos").getPublicUrl(storagePath)
     if (!pub?.publicUrl) {
       return new NextResponse("Not Found", { status: 404 })
     }
-    return fetchAndRespond(pub.publicUrl)
+    sourceUrl = pub.publicUrl
+  } else {
+    sourceUrl = data.signedUrl
   }
 
-  return fetchAndRespond(data.signedUrl)
+  sourceUrl = addImageTransform(sourceUrl)
+  return fetchAndRespond(sourceUrl)
+}
+
+function addImageTransform(url: string): string {
+  const params = new URLSearchParams({ width: "1200", format: "webp", quality: "80" })
+  const separator = url.includes("?") ? "&" : "?"
+  return `${url}${separator}${params.toString()}`
 }
 
 async function serveFromLocal(localPath: string): Promise<NextResponse> {
@@ -57,7 +68,7 @@ async function serveFromLocal(localPath: string): Promise<NextResponse> {
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400, immutable",
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400, max-age=86400, immutable",
         "Content-Disposition": "inline",
         "X-Content-Type-Options": "nosniff",
       },
@@ -79,7 +90,7 @@ async function fetchAndRespond(sourceUrl: string): Promise<NextResponse> {
     return new NextResponse(blob, {
       headers: {
         "Content-Type": response.headers.get("content-type") || "image/webp",
-        "Cache-Control": "public, max-age=86400, immutable",
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400, max-age=86400, immutable",
         "Content-Disposition": "inline",
         "X-Content-Type-Options": "nosniff",
       },

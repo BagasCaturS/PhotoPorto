@@ -9,6 +9,8 @@ import { fallbackPhotos, categories_all, type Photo } from "@/data/photos"
 import { createClient } from "@/lib/supabase/server"
 import { getProxiedUrl } from "@/lib/utils"
 
+export const revalidate = 3600
+
 export default async function Home() {
   const supabase = await createClient()
 
