@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         pathname: "/api/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "**",
+        pathname: "/api/images/**",
+      },
     ],
   },
 };
