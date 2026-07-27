@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
-import { Upload } from "lucide-react"
+import { Upload, LayoutList } from "lucide-react"
+import Link from "next/link"
 import type { Photo } from "@/components/admin/types"
 import { MAX_SELECTED, MAX_FEATURED } from "@/components/admin/types"
 import PhotoGrid from "@/components/admin/PhotoGrid"
-import UploadForm from "@/components/admin/UploadForm"
 import EditModal from "@/components/admin/EditModal"
 
 type Toast = { message: string; type: "success" | "error" } | null
@@ -13,7 +13,6 @@ type Toast = { message: string; type: "success" | "error" } | null
 export default function AdminPhotos() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
-  const [showUpload, setShowUpload] = useState(false)
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null)
   const [toast, setToast] = useState<Toast>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -179,11 +178,6 @@ export default function AdminPhotos() {
     }
   }, [showToast])
 
-  const handleUploadComplete = useCallback(async () => {
-    await fetchPhotos()
-    showToast("Upload complete.")
-  }, [fetchPhotos, showToast])
-
   const randomSelectPhotos = useCallback(async () => {
     const allPhotos = photosRef.current
 
@@ -261,16 +255,23 @@ export default function AdminPhotos() {
             {photos.filter((p) => p.is_featured).length} featured
           </p>
         </div>
-        <button
-          onClick={() => setShowUpload(!showUpload)}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 dark:bg-dark-foreground dark:text-dark-background"
-        >
-          <Upload size={15} />
-          {showUpload ? "Cancel" : "Upload Photo"}
-        </button>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/photos/manage"
+            className="inline-flex items-center gap-2 rounded-full border border-border/60 px-6 py-2.5 font-mono text-sm font-medium text-secondary transition-all hover:border-border hover:text-foreground dark:border-dark-border/60 dark:text-dark-secondary dark:hover:border-dark-border dark:hover:text-dark-foreground"
+          >
+            <LayoutList size={15} />
+            Assign
+          </Link>
+          <Link
+            href="/admin/photos/upload"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 font-mono text-sm font-medium text-background transition-all hover:bg-foreground/90 dark:bg-dark-foreground dark:text-dark-background"
+          >
+            <Upload size={15} />
+            Upload
+          </Link>
+        </div>
       </div>
-
-      {showUpload && <UploadForm onUploadComplete={handleUploadComplete} />}
 
       <PhotoGrid
         photos={photos}
