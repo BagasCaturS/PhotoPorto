@@ -7,6 +7,7 @@ import Contact from "@/components/Contact"
 import Footer from "@/components/Footer"
 import { fallbackPhotos, categories_all, type Photo } from "@/data/photos"
 import { createClient } from "@/lib/supabase/server"
+import { getProxiedUrl } from "@/lib/utils"
 
 export default async function Home() {
   const supabase = await createClient()
@@ -26,15 +27,18 @@ export default async function Home() {
   ])
 
   const data = galleryResult.data
-  const heroSrc = heroResult.data?.url || null
-  const featuredData = featuredResult.data || []
+  const heroSrc = heroResult.data?.url ? getProxiedUrl(heroResult.data.url) : null
+  const featuredData = (featuredResult.data || []).map((f) => ({
+    ...f,
+    url: getProxiedUrl(f.url),
+  }))
 
   let photos: Photo[] = fallbackPhotos
 
   if (data && data.length > 0) {
     photos = data.map((p) => ({
       id: p.id,
-      src: p.url,
+      src: getProxiedUrl(p.url),
       title: p.title || p.filename.replace(/\.[^.]+$/, ""),
       description: p.description || "",
       category: p.category || categories_all[p.display_order % categories_all.length],

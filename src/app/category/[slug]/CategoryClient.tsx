@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import type { Photo } from "@/data/photos"
 import Lightbox from "@/components/Lightbox"
+import ProtectedImage from "@/components/ProtectedImage"
 
 interface Props {
   photos: Photo[]
@@ -30,7 +30,7 @@ export default function CategoryClient({ photos }: Props) {
             className="group mb-6 block break-inside-avoid overflow-hidden rounded-xl cursor-pointer"
           >
             <div className="relative overflow-hidden rounded-xl bg-muted dark:bg-dark-muted">
-              <Image
+              <ProtectedImage
                 src={photo.src}
                 alt={photo.title}
                 width={photo.width}

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
-import Image from "next/image"
+import ProtectedImage from "@/components/ProtectedImage"
+import { getProxiedUrl } from "@/lib/utils"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { ArrowLeft } from "lucide-react"
@@ -47,8 +48,8 @@ export default async function PhotoPage({ params }: Props) {
 
       <div className="mx-auto max-w-6xl px-6 pb-6">
         <div className="relative overflow-hidden rounded-2xl bg-neutral-900">
-          <Image
-            src={photo.src}
+          <ProtectedImage
+            src={getProxiedUrl(photo.src)}
             alt={photo.title}
             width={photo.width}
             height={photo.height}

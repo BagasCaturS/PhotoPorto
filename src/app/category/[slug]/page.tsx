@@ -3,6 +3,7 @@ import { fallbackPhotos, categories_all } from "@/data/photos"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import CategoryClient from "./CategoryClient"
+import { getProxiedUrl } from "@/lib/utils"
 import type { Metadata } from "next"
 
 interface Props {
@@ -30,7 +31,9 @@ export default async function CategoryPage({ params }: Props) {
 
   if (!valid.includes(slug)) notFound()
 
-  const filtered = fallbackPhotos.filter((p) => p.category.toLowerCase() === slug)
+  const filtered = fallbackPhotos
+    .filter((p) => p.category.toLowerCase() === slug)
+    .map((p) => ({ ...p, src: getProxiedUrl(p.src) }))
 
   return (
     <>

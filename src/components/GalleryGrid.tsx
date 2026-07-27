@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import Image from "next/image"
 import type { Photo } from "@/data/photos"
 import Lightbox from "./Lightbox"
+import ProtectedImage from "./ProtectedImage"
 
 interface GalleryGridProps {
   photos: Photo[]
@@ -71,7 +71,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
               className="group mb-6 block break-inside-avoid overflow-hidden rounded-xl cursor-pointer"
             >
               <div className="relative overflow-hidden rounded-xl bg-muted dark:bg-dark-muted">
-                <Image
+                <ProtectedImage
                   src={photo.src}
                   alt={photo.title}
                   width={photo.width}

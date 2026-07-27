@@ -103,6 +103,8 @@ export const fallbackPhotos: Photo[] = rawFiles.map((file, i) => ({
   height: i % 3 === 0 ? 3600 : 2400,
 }))
 
+import { getProxiedUrl } from "@/lib/utils"
+
 export async function fetchPhotos(): Promise<Photo[]> {
   try {
     const res = await fetch("/api/photos")
@@ -121,7 +123,7 @@ export async function fetchPhotos(): Promise<Photo[]> {
         display_order: number
       }) => ({
         id: p.id,
-        src: p.url,
+        src: getProxiedUrl(p.url),
         title: p.title || p.filename.replace(/\.[^.]+$/, ""),
         description: p.description || "",
         category: p.category || categories[p.display_order % categories.length],

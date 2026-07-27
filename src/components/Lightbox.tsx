@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useCallback } from "react"
-import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Photo } from "@/data/photos"
+import ProtectedImage from "./ProtectedImage"
 
 interface LightboxProps {
   photos: Photo[]
@@ -76,7 +76,7 @@ export default function Lightbox({
         className="flex max-h-[90vh] max-w-[90vw] items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <Image
+        <ProtectedImage
           src={photo.src}
           alt={photo.title}
           width={photo.width}

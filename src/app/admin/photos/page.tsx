@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
-import { Upload } from "lucide-react"
+import { Upload, Shuffle } from "lucide-react"
 import type { Photo } from "@/components/admin/types"
 import { MAX_SELECTED, MAX_FEATURED } from "@/components/admin/types"
 import PhotoGrid from "@/components/admin/PhotoGrid"
@@ -162,6 +162,42 @@ export default function AdminPhotos() {
     await fetchPhotos()
   }, [fetchPhotos])
 
+  const randomSelectPhotos = useCallback(async () => {
+    const allPhotos = photosRef.current
+
+    let targetIds: Set<string>
+    if (allPhotos.length <= MAX_SELECTED) {
+      targetIds = new Set(allPhotos.map((p) => p.id))
+    } else {
+      const shuffled = [...allPhotos].sort(() => Math.random() - 0.5)
+      targetIds = new Set(shuffled.slice(0, MAX_SELECTED).map((p) => p.id))
+    }
+
+    const changed = allPhotos.filter((p) => p.selected !== targetIds.has(p.id))
+    if (changed.length === 0) return
+
+    setPhotos((prev) =>
+      prev.map((p) => ({ ...p, selected: targetIds.has(p.id) }))
+    )
+
+    const results = await Promise.allSettled(
+      changed.map((p) =>
+        fetch(`/api/photos/${p.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ selected: targetIds.has(p.id) }),
+        })
+      )
+    )
+
+    const failed = results.some(
+      (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
+    )
+    if (failed) {
+      await fetchPhotos()
+    }
+  }, [fetchPhotos])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -194,6 +230,7 @@ export default function AdminPhotos() {
         onSetHero={setHero}
         onEdit={startEdit}
         onDelete={handleDelete}
+        onRandomSelect={randomSelectPhotos}
       />
 
       <EditModal

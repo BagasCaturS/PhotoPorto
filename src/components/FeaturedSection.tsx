@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Image from "next/image"
+import ProtectedImage from "./ProtectedImage"
 import {
   ProgressSlider,
   SliderContent,
@@ -66,7 +66,7 @@ export default function FeaturedSection({ photos }: Props) {
             {photos.map((photo) => (
               <SliderWrapper key={photo.id} value={photo.id}>
                 <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-900 sm:aspect-[16/9]">
-                  <Image
+                  <ProtectedImage
                     src={photo.url}
                     alt={photo.title}
                     fill
