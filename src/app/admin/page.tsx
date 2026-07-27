@@ -11,23 +11,29 @@ export default function AdminDashboard() {
     selected: number
     journals: number
     drafts: number
+    messages: number
+    unread: number
     loading: boolean
-  }>({ photos: 0, selected: 0, journals: 0, drafts: 0, loading: true })
+  }>({ photos: 0, selected: 0, journals: 0, drafts: 0, messages: 0, unread: 0, loading: true })
 
   useEffect(() => {
     const fetch = async () => {
       const supabase = createClient()
-      const [photosRes, selectedRes, journalsRes, draftsRes] = await Promise.all([
+      const [photosRes, selectedRes, journalsRes, draftsRes, messagesRes, unreadRes] = await Promise.all([
         supabase.from("photos").select("*", { count: "exact", head: true }),
         supabase.from("photos").select("*", { count: "exact", head: true }).eq("selected", true),
         supabase.from("journals").select("*", { count: "exact", head: true }),
         supabase.from("journals").select("*", { count: "exact", head: true }).eq("published", false),
+        supabase.from("messages").select("*", { count: "exact", head: true }),
+        supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
       ])
       setStats({
         photos: photosRes.count || 0,
         selected: selectedRes.count || 0,
         journals: journalsRes.count || 0,
         drafts: draftsRes.count || 0,
+        messages: messagesRes.count || 0,
+        unread: unreadRes.count || 0,
         loading: false,
       })
     }
@@ -37,6 +43,10 @@ export default function AdminDashboard() {
   const draftLabel = stats.drafts > 0
     ? `${stats.journals - stats.drafts} published, ${stats.drafts} draft`
     : `${stats.journals} entries`
+
+  const messagesLabel = stats.unread > 0
+    ? `${stats.messages} total, ${stats.unread} unread`
+    : `${stats.messages} messages`
 
   return (
     <div className="grid gap-6 sm:grid-cols-3">
@@ -51,6 +61,11 @@ export default function AdminDashboard() {
           label: "Journal Entries",
           value: draftLabel,
           href: "/admin/journals",
+        },
+        {
+          label: "Messages",
+          value: messagesLabel,
+          href: "/admin/messages",
         },
       ].map((card) => (
         <Link
