@@ -55,13 +55,14 @@ export default function JournalEntryPage() {
               src={entry.coverSrc}
               alt={entry.title}
               fill
-              className="object-cover opacity-60"
+              className="object-cover"
               preload
               sizes="100vw"
             />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-neutral-700 to-neutral-900" />
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
           <div className="absolute inset-0 flex flex-col items-center justify-end pb-12">
             <div className="mx-auto max-w-3xl px-6 text-center">
               <div className="flex flex-wrap justify-center gap-2 mb-4">
