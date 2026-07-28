@@ -41,15 +41,20 @@ export default async function Home() {
   let photos: Photo[] = fallbackPhotos
 
   if (data && data.length > 0) {
-    photos = data.map((p) => ({
-      id: p.id,
-      src: getProxiedUrl(p.url),
-      title: p.title || p.filename.replace(/\.[^.]+$/, ""),
-      description: p.description || "",
-      category: p.category || categories_all[p.display_order % categories_all.length],
-      width: 2400,
-      height: 3600,
-    }))
+    photos = data.map((p, idx) => {
+      const normalized = categories_all.find(
+        (c) => c.toLowerCase() === (p.category || "").toLowerCase()
+      )
+      return {
+        id: p.id,
+        src: getProxiedUrl(p.url),
+        title: p.title || p.filename.replace(/\.[^.]+$/, ""),
+        description: p.description || "",
+        category: normalized || categories_all[(p.display_order ?? idx) % categories_all.length],
+        width: 2400,
+        height: 3600,
+      }
+    })
   }
 
   return (
