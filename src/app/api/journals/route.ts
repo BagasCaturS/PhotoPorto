@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       title: body.title,
       slug,
       excerpt: body.excerpt || body.title,
-      content: body.content || [],
+      content: typeof body.content === "string" ? [body.content] : (body.content || []),
       cover_src: body.coverSrc || body.cover_src || "",
       tags: body.tags || [],
       published: body.published ?? true,

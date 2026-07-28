@@ -65,7 +65,7 @@ export async function PUT(
   const updateData: Record<string, unknown> = {
     title: body.title,
     excerpt: body.excerpt,
-    content: body.content,
+    content: typeof body.content === "string" ? [body.content] : body.content,
     cover_src: body.coverSrc || body.cover_src,
     tags: body.tags,
     updated_at: new Date().toISOString(),

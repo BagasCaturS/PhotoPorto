@@ -6,7 +6,11 @@ function mapEntry(raw: Record<string, unknown>): JournalEntry {
   if (typeof rawContent === "string") {
     content = rawContent
   } else if (Array.isArray(rawContent)) {
-    content = rawContent.map((p: string) => `<p>${p}</p>`).join("\n")
+    if (rawContent.length === 1 && (rawContent[0] || "").startsWith("<")) {
+      content = rawContent[0]
+    } else {
+      content = rawContent.map((p: string) => `<p>${p}</p>`).join("\n")
+    }
   }
   return {
     id: raw.id as string,
