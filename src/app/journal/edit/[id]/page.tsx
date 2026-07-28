@@ -7,6 +7,7 @@ import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { createClient } from "@/lib/supabase/client"
 import { fetchJournal, updateJournal } from "@/lib/journal-api"
+import { compressImage } from "@/lib/compress-image"
 import { Upload, X } from "lucide-react"
 import RichTextEditor from "@/components/RichTextEditor"
 
@@ -77,12 +78,12 @@ export default function EditJournalPage() {
 
   const uploadCover = async (): Promise<string> => {
     if (!coverFile) return coverSrc
+    const compressed = await compressImage(coverFile)
     const supabase = createClient()
-    const ext = coverFile.name.split(".").pop()
-    const path = `covers/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const path = `covers/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`
     const { error: uploadErr } = await supabase.storage
       .from("photos")
-      .upload(path, coverFile, { contentType: coverFile.type, upsert: true })
+      .upload(path, compressed, { contentType: "image/webp", upsert: true })
     if (uploadErr) throw new Error(uploadErr.message)
     const { data: { publicUrl } } = supabase.storage.from("photos").getPublicUrl(path)
     return publicUrl

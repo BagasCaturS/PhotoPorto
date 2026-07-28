@@ -17,7 +17,7 @@ export function getThumbUrl(url: string, width = 250): string {
   let thumb = url
   if (SUPABASE_STORAGE_RE.test(url)) {
     const sep = url.includes("?") ? "&" : "?"
-    thumb = `${url}${sep}width=${width}&quality=30`
+    thumb = `${url}${sep}width=${width}&quality=30&format=avif`
   }
   STORAGE_URL_CACHE.set(url, thumb)
   return thumb

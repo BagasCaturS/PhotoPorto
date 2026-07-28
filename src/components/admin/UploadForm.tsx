@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react"
-import { Upload, Layers, X, FileImage } from "lucide-react"
+import { Upload, Layers, X, FileImage, Trash2 } from "lucide-react"
 import { CATEGORIES } from "./types"
+import { compressImage } from "@/lib/compress-image"
 
 interface Props {
   onUploadComplete: () => Promise<void>
@@ -51,13 +52,21 @@ export default function UploadForm({ onUploadComplete }: Props) {
     })
   }, [])
 
+  const removeBatchFile = useCallback((index: number) => {
+    URL.revokeObjectURL(batchPreviews[index])
+    setBatchFiles((prev) => prev.filter((_, i) => i !== index))
+    setBatchPreviews((prev) => prev.filter((_, i) => i !== index))
+    setBatchMeta((prev) => prev.filter((_, i) => i !== index))
+  }, [batchPreviews])
+
   const handleSingleUpload = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!uploadFile) return
 
     setUploading(true)
+    const compressed = await compressImage(uploadFile)
     const formData = new FormData()
-    formData.append("file", uploadFile)
+    formData.append("file", compressed)
     formData.append("title", uploadTitle)
     formData.append("description", uploadDesc)
     formData.append("category", uploadCat)
@@ -85,10 +94,11 @@ export default function UploadForm({ onUploadComplete }: Props) {
     const CHUNK_SIZE = 5
     for (let i = 0; i < batchFiles.length; i += CHUNK_SIZE) {
       const chunk = batchFiles.slice(i, i + CHUNK_SIZE)
-      const uploads = chunk.map((file, j) => {
+      const uploads = chunk.map(async (file, j) => {
         const idx = i + j
+        const compressed = await compressImage(file)
         const formData = new FormData()
-        formData.append("file", file)
+        formData.append("file", compressed)
         formData.append("title", batchMeta[idx]?.title || file.name.replace(/\.[^.]+$/, ""))
         formData.append("description", batchMeta[idx]?.description || "")
         formData.append("category", batchMeta[idx]?.category || CATEGORIES[0])
@@ -260,6 +270,7 @@ export default function UploadForm({ onUploadComplete }: Props) {
                     <th className="px-3 py-2.5 font-medium">Title</th>
                     <th className="px-3 py-2.5 font-medium">Description</th>
                     <th className="px-3 py-2.5 font-medium">Category</th>
+                    <th className="w-12 px-3 py-2.5 font-medium">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -300,6 +311,16 @@ export default function UploadForm({ onUploadComplete }: Props) {
                             <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
+                      </td>
+                      <td className="px-3 py-2">
+                        <button
+                          type="button"
+                          onClick={() => removeBatchFile(i)}
+                          className="cursor-pointer rounded-lg p-1.5 text-secondary transition-colors hover:bg-destructive/10 hover:text-destructive dark:text-dark-secondary dark:hover:text-destructive"
+                          title="Remove"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </td>
                     </tr>
                   ))}

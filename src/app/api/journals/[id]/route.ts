@@ -62,11 +62,27 @@ export async function PUT(
   }
 
   const body = await request.json()
+  const newCover = body.coverSrc || body.cover_src
+
+  const { data: existing } = await supabase
+    .from("journals")
+    .select("cover_src")
+    .eq("slug", id)
+    .single()
+
+  const oldCover = existing?.cover_src
+  if (oldCover && newCover && oldCover !== newCover) {
+    const storagePath = oldCover.split("/photos/").pop()
+    if (storagePath) {
+      await supabase.storage.from("photos").remove([storagePath])
+    }
+  }
+
   const updateData: Record<string, unknown> = {
     title: body.title,
     excerpt: body.excerpt,
     content: typeof body.content === "string" ? [body.content] : body.content,
-    cover_src: body.coverSrc || body.cover_src,
+    cover_src: newCover,
     tags: body.tags,
     updated_at: new Date().toISOString(),
   }

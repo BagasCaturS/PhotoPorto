@@ -16,6 +16,7 @@
     "@tiptap/pm": "^3.29.2",
     "@tiptap/react": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.27.0",
     "motion": "^12.42.2",

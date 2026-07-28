@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import { ArrowLeft, Star, Heart, Image as ImageIcon, X, Check, Plus } from "lucide-react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import type { Photo } from "@/components/admin/types"
 import { MAX_SELECTED, MAX_FEATURED } from "@/components/admin/types"
-import { getThumbUrl } from "@/lib/utils"
 
 type Toast = { message: string; type: "success" | "error" } | null
 type PickerMode = "hero" | "featured" | "gallery" | null
@@ -21,7 +21,7 @@ function PhotoThumb({ photo, selected, onClick }: { photo: Photo; selected?: boo
       }`}
     >
       <img
-        src={getThumbUrl(photo.url)}
+        src={photo.url}
         alt={photo.title || photo.filename}
         loading="lazy"
         className="h-full w-full object-cover"
@@ -249,10 +249,13 @@ export default function ManageAssignments() {
             <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-muted dark:bg-dark-muted">
               <div className="flex flex-col sm:flex-row">
                 <div className="relative aspect-video sm:w-1/2 lg:aspect-[16/9]">
-                  <img
-                    src={getThumbUrl(heroPhoto.url)}
+                  <Image
+                    src={heroPhoto.url}
                     alt={heroPhoto.title || "Hero photo"}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="50vw"
+                    className="object-cover"
+                    priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
                 </div>
