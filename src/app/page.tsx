@@ -1,5 +1,6 @@
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
+import { TheInfiniteGrid } from "@/components/ui/the-infinite-grid"
 import GalleryGrid from "@/components/GalleryGrid"
 import FeaturedSection from "@/components/FeaturedSection"
 import About from "@/components/About"
@@ -55,6 +56,7 @@ export default async function Home() {
       <Header />
       <main>
         <Hero heroSrc={heroSrc} />
+        <TheInfiniteGrid />
         <GalleryGrid photos={photos} categories={categories_all} />
         <FeaturedSection photos={featuredData} />
         <About />
