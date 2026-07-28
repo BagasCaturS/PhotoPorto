@@ -137,6 +137,11 @@ export default function JournalPage() {
                         <h2 className="font-sans text-2xl font-bold transition-colors group-hover:text-accent sm:text-3xl">
                           {entry.title}
                         </h2>
+                        {isAdmin && !entry.published && (
+                          <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-amber-500/40 px-2.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                            Draft
+                          </span>
+                        )}
                         <p className="mt-3 font-mono text-base leading-relaxed text-secondary dark:text-dark-secondary">
                           {entry.excerpt}
                         </p>

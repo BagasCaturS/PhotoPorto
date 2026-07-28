@@ -84,6 +84,11 @@ export default function JournalEntryPage() {
               <h1 className="font-sans text-3xl font-bold text-on-primary sm:text-5xl">
                 {entry.title}
               </h1>
+              {isAdmin && !entry.published && (
+                <span className="mt-3 inline-flex items-center gap-1 rounded-full border border-amber-400/50 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-wider text-amber-300">
+                  Draft
+                </span>
+              )}
             </div>
           </div>
         </div>
