@@ -71,6 +71,7 @@ export default async function Home() {
           { platform: "instagram", href: "https://www.instagram.com/idont_do_art/" },
           { platform: "github", href: "https://github.com/BagasCaturS" },
         ]}
+        showOnMobile={false}
         floatingButtonColor="bg-zinc-800 dark:bg-zinc-700"
       />
       <Footer />
