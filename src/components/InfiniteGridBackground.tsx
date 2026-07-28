@@ -32,11 +32,11 @@ export default function InfiniteGridBackground({ children }: Props) {
   return (
     <div ref={containerRef} onMouseMove={handleMouseMove} className="relative min-h-screen">
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0 opacity-[0.05]">
           <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
         </div>
         <motion.div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-35"
           style={{ maskImage, WebkitMaskImage: maskImage }}
         >
           <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
@@ -77,7 +77,7 @@ const GridPattern = ({
             fill="none"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-foreground"
+            className="text-muted-foreground"
           />
         </motion.pattern>
       </defs>
