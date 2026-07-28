@@ -1,6 +1,6 @@
 import { memo } from "react"
+import Image from "next/image"
 import { Star, Pencil, Trash2, Check } from "lucide-react"
-import { getThumbUrl } from "@/lib/utils"
 import type { Photo } from "./types"
 
 interface Props {
@@ -22,12 +22,12 @@ function PhotoCard({ photo, onToggleSelect, onToggleFeatured, onSetHero, onEdit,
       }`}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted dark:bg-dark-muted">
-        <img
-          src={getThumbUrl(photo.url)}
+        <Image
+          src={photo.url}
           alt={photo.title || photo.filename}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
+          className="object-cover transition-all duration-500 group-hover:scale-105"
         />
 
         {photo.selected && (
