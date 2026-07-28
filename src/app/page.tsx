@@ -1,5 +1,6 @@
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
+import InfiniteGridBackground from "@/components/InfiniteGridBackground"
 import GalleryGrid from "@/components/GalleryGrid"
 import FeaturedSection from "@/components/FeaturedSection"
 import About from "@/components/About"
@@ -53,13 +54,15 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <main>
-        <Hero heroSrc={heroSrc} />
-        <GalleryGrid photos={photos} categories={categories_all} />
-        <FeaturedSection photos={featuredData} />
-        <About />
-        <Contact />
-      </main>
+      <InfiniteGridBackground>
+        <main>
+          <Hero heroSrc={heroSrc} />
+          <GalleryGrid photos={photos} categories={categories_all} />
+          <FeaturedSection photos={featuredData} />
+          <About />
+          <Contact />
+        </main>
+      </InfiniteGridBackground>
       <SocialLinks
         links={[
           { platform: "linkedin", href: "https://www.linkedin.com/in/web-bagascaturs/" },

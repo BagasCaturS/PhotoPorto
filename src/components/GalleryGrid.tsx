@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
-import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from "motion/react"
+import { useState, useCallback } from "react"
+import { motion } from "motion/react"
 import type { Photo } from "@/data/photos"
 import Lightbox from "./Lightbox"
 import ProtectedImage from "./ProtectedImage"
@@ -44,26 +44,6 @@ const cardUp = {
 export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
   const [activeCategory, setActiveCategory] = useState<string>("All")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top } = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - left)
-    mouseY.set(e.clientY - top)
-  }
-
-  const gridOffsetX = useMotionValue(0)
-  const gridOffsetY = useMotionValue(0)
-
-  useAnimationFrame(() => {
-    gridOffsetX.set((gridOffsetX.get() + 0.5) % 40)
-    gridOffsetY.set((gridOffsetY.get() + 0.5) % 40)
-  })
-
-  const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`
 
   const filtered =
     activeCategory === "All"
@@ -81,31 +61,13 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
   return (
     <motion.section
       id="gallery"
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      className="relative py-24 sm:py-32 overflow-hidden"
+      className="py-24 sm:py-32"
       variants={sectionVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
     >
-      <div className="absolute inset-0 z-0 opacity-[0.03]">
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
-      </div>
-      <motion.div
-        className="absolute inset-0 z-0 opacity-20"
-        style={{ maskImage, WebkitMaskImage: maskImage }}
-      >
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
-      </motion.div>
-
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute right-[-20%] top-[-20%] w-[40%] h-[40%] rounded-full bg-orange-500/20 dark:bg-orange-600/10 blur-[120px]" />
-        <div className="absolute right-[10%] top-[-10%] w-[20%] h-[20%] rounded-full bg-primary/15 blur-[100px]" />
-        <div className="absolute left-[-10%] bottom-[-20%] w-[40%] h-[40%] rounded-full bg-blue-500/20 dark:bg-blue-600/10 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-6">
         <motion.div className="mb-16 text-center" variants={headingUp}>
           <p className="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-4">
             Collection
@@ -154,7 +116,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
               tabIndex={0}
               className="group mb-6 block break-inside-avoid overflow-hidden rounded-xl cursor-pointer"
             >
-              <div className="relative overflow-hidden rounded-xl bg-muted/80 dark:bg-dark-muted/80 backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-xl bg-muted dark:bg-dark-muted">
                 <ProtectedImage
                   src={photo.src}
                   alt={photo.title}
@@ -187,37 +149,5 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
         />
       )}
     </motion.section>
-  )
-}
-
-const GridPattern = ({
-  offsetX,
-  offsetY,
-}: {
-  offsetX: ReturnType<typeof useMotionValue<number>>
-  offsetY: ReturnType<typeof useMotionValue<number>>
-}) => {
-  return (
-    <svg className="w-full h-full">
-      <defs>
-        <motion.pattern
-          id="gallery-grid-pattern"
-          width="40"
-          height="40"
-          patternUnits="userSpaceOnUse"
-          x={offsetX}
-          y={offsetY}
-        >
-          <path
-            d="M 40 0 L 0 0 0 40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            className="text-foreground"
-          />
-        </motion.pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#gallery-grid-pattern)" />
-    </svg>
   )
 }
