@@ -90,11 +90,10 @@ export default function JournalEntryPage() {
 
         <article className="py-16 sm:py-24">
           <div className="mx-auto max-w-3xl px-6">
-            <div className="space-y-6 font-mono text-base leading-relaxed text-secondary dark:text-dark-secondary">
-              {entry.content.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
+            <div
+              className="prose prose-lg dark:prose-invert max-w-none font-mono leading-relaxed text-secondary dark:text-dark-secondary [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans"
+              dangerouslySetInnerHTML={{ __html: entry.content }}
+            />
 
             {isAdmin && (
               <div className="mt-8 flex items-center gap-4 border-t border-border pt-6 dark:border-dark-border">

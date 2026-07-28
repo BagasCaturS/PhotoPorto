@@ -109,6 +109,20 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
+  const { data: journal } = await supabase
+    .from("journals")
+    .select("cover_src")
+    .eq("slug", id)
+    .single()
+
+  if (journal?.cover_src) {
+    const coverUrl = journal.cover_src
+    const storagePath = coverUrl.split("/photos/").pop()
+    if (storagePath) {
+      await supabase.storage.from("photos").remove([storagePath])
+    }
+  }
+
   const { error } = await supabase
     .from("journals")
     .delete()

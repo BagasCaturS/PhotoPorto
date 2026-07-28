@@ -8,6 +8,7 @@ import Footer from "@/components/Footer"
 import { createClient } from "@/lib/supabase/client"
 import { fetchJournal, updateJournal } from "@/lib/journal-api"
 import { Upload, X } from "lucide-react"
+import RichTextEditor from "@/components/RichTextEditor"
 
 export default function EditJournalPage() {
   const { id } = useParams<{ id: string }>()
@@ -40,7 +41,7 @@ export default function EditJournalPage() {
         const entry = await fetchJournal(id)
         setTitle(entry.title)
         setExcerpt(entry.excerpt)
-        setContent(entry.content.join("\n"))
+        setContent(entry.content)
         setTags(entry.tags.join(", "))
         setCoverSrc(entry.coverSrc)
         setSlug(entry.slug)
@@ -98,7 +99,7 @@ export default function EditJournalPage() {
       await updateJournal(slug, {
         title: title.trim(),
         excerpt: excerpt.trim() || title.trim(),
-        content: content.split("\n").map((p) => p.trim()).filter(Boolean),
+        content,
         coverSrc: coverUrl,
         tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
         published: !asDraft,
@@ -114,7 +115,6 @@ export default function EditJournalPage() {
   if (!loaded || !isAdmin) return null
 
   const tagList = tags.split(",").map((t) => t.trim()).filter(Boolean)
-  const contentParagraphs = content.split("\n").map((p) => p.trim()).filter(Boolean)
   const currentCover = coverPreview || coverSrc
 
   return (
@@ -149,9 +149,8 @@ export default function EditJournalPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="content" className="block font-mono text-sm font-medium mb-2">Content * (one paragraph per line)</label>
-                  <textarea id="content" rows={12} value={content} onChange={(e) => setContent(e.target.value)} required
-                    className="w-full resize-y rounded-xl border border-border bg-transparent px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent dark:border-dark-border dark:focus:border-dark-accent" />
+                  <label htmlFor="content" className="block font-mono text-sm font-medium mb-2">Content *</label>
+                  <RichTextEditor content={content} onChange={setContent} placeholder="Write your journal entry here..." />
                 </div>
 
                 <div>
@@ -201,7 +200,7 @@ export default function EditJournalPage() {
               {/* ---- PREVIEW ---- */}
               <div className="lg:sticky lg:top-28 lg:self-start">
                 <p className="mb-6 text-center font-mono text-xs tracking-[0.2em] uppercase text-accent">Preview</p>
-                {!title && !currentCover && contentParagraphs.length === 0 ? (
+                {!title && !currentCover && !content ? (
                   <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-border py-32 dark:border-dark-border">
                     <p className="font-mono text-sm text-secondary dark:text-dark-secondary">Start typing to see preview</p>
                   </div>
@@ -232,10 +231,11 @@ export default function EditJournalPage() {
                       </div>
                     </div>
                     <div className="px-6 py-10">
-                      {contentParagraphs.length > 0 ? (
-                        <div className="space-y-6 font-mono text-base leading-relaxed text-secondary dark:text-dark-secondary">
-                          {contentParagraphs.map((p, i) => <p key={i}>{p}</p>)}
-                        </div>
+                      {content ? (
+                        <div
+                          className="prose prose-sm dark:prose-invert max-w-none font-mono text-base leading-relaxed text-secondary dark:text-dark-secondary [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans"
+                          dangerouslySetInnerHTML={{ __html: content }}
+                        />
                       ) : (
                         <p className="font-mono text-sm text-secondary/50 dark:text-dark-secondary/50 italic">
                           No content yet

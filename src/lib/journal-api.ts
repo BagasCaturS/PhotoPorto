@@ -1,12 +1,19 @@
 import type { JournalEntry } from "@/data/journal"
 
 function mapEntry(raw: Record<string, unknown>): JournalEntry {
+  const rawContent = raw.content
+  let content = ""
+  if (typeof rawContent === "string") {
+    content = rawContent
+  } else if (Array.isArray(rawContent)) {
+    content = rawContent.map((p: string) => `<p>${p}</p>`).join("\n")
+  }
   return {
     id: raw.id as string,
     slug: raw.slug as string,
     title: raw.title as string,
     excerpt: (raw.excerpt as string) || "",
-    content: (raw.content as string[]) || [],
+    content,
     date: (raw.date as string) || "",
     coverSrc: (raw.cover_src as string) || "",
     tags: (raw.tags as string[]) || [],

@@ -3,7 +3,7 @@ export interface JournalEntry {
   slug: string
   title: string
   excerpt: string
-  content: string[]
+  content: string
   date: string
   coverSrc: string
   tags: string[]
