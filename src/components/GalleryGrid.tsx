@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 import type { Photo } from "@/data/photos"
 import Lightbox from "./Lightbox"
 import ProtectedImage from "./ProtectedImage"
@@ -65,7 +65,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
       variants={sectionVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ margin: "-100px" }}
     >
       <div className="mx-auto max-w-7xl px-6">
         <motion.div className="mb-16 text-center" variants={headingUp}>
@@ -98,14 +98,18 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
         </motion.div>
 
         <motion.div
-          key={activeCategory}
           className="columns-1 gap-6 sm:columns-2 lg:columns-3"
           variants={headingUp}
         >
+          <AnimatePresence mode="popLayout">
           {filtered.map((photo, i) => (
             <motion.div
               key={photo.id}
+              layout
               variants={cardUp}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, y: -16, transition: { duration: 0.25 } }}
               onClick={() => setLightboxIndex(getGlobalIndex(i))}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -138,6 +142,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
               </div>
             </motion.div>
           ))}
+          </AnimatePresence>
         </motion.div>
       </div>
 
