@@ -1,14 +1,30 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { motion } from "motion/react"
 import ProtectedImage from "./ProtectedImage"
 
 interface Props {
   heroSrc?: string | null
 }
 
+const contentVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+  },
+}
+
+const childUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
+}
+
 export default function Hero({ heroSrc }: Props) {
   const parallaxRef = useRef<HTMLDivElement>(null)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const loaded = imageLoaded || !heroSrc
 
   useEffect(() => {
     const el = parallaxRef.current
@@ -23,7 +39,12 @@ export default function Hero({ heroSrc }: Props) {
 
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden bg-foreground dark:bg-dark-foreground">
-      <div ref={parallaxRef} className="absolute inset-0 will-change-transform">
+      <div
+        ref={parallaxRef}
+        className={`absolute inset-0 will-change-transform transition-all duration-[1200ms] ease-out ${
+          loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"
+        }`}
+      >
         {heroSrc ? (
           <ProtectedImage
             src={heroSrc}
@@ -32,22 +53,35 @@ export default function Hero({ heroSrc }: Props) {
             className="object-cover"
             preload
             sizes="100vw"
+            onLoad={() => setImageLoaded(true)}
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-neutral-800 to-neutral-900" />
         )}
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/30 to-black/90" />
+      <div
+        className={`absolute inset-0 bg-gradient-to-b from-black/80 via-black/30 to-black/90 transition-opacity duration-1000 ease-out ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
-        <div className="mx-auto max-w-3xl text-center">
+      <motion.div
+        className="relative z-10 mx-auto w-full max-w-7xl px-6"
+        variants={contentVariants}
+        initial="hidden"
+        animate={loaded ? "visible" : "hidden"}
+      >
+        <motion.div className="mx-auto max-w-3xl text-center" variants={childUp}>
           <p
             className="font-mono text-xs tracking-[0.2em] uppercase text-accent mb-5"
             style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
           >
             Photography Portfolio
           </p>
+        </motion.div>
+
+        <motion.div className="mx-auto max-w-3xl text-center" variants={childUp}>
           <h1
             className="font-sans text-5xl font-bold leading-[0.95] tracking-tight text-on-primary sm:text-7xl lg:text-8xl xl:text-9xl"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5), 0 4px 24px rgba(0,0,0,0.3)" }}
@@ -58,12 +92,18 @@ export default function Hero({ heroSrc }: Props) {
             <br />
             <span className="text-accent">Moment.</span>
           </h1>
+        </motion.div>
+
+        <motion.div className="mx-auto max-w-3xl text-center" variants={childUp}>
           <p
             className="mx-auto mt-6 max-w-lg font-mono text-base leading-relaxed text-on-primary/50"
             style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
           >
             A curated collection of visual stories captured through the lens.
           </p>
+        </motion.div>
+
+        <motion.div className="mx-auto max-w-3xl text-center" variants={childUp}>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href="#gallery"
@@ -80,8 +120,8 @@ export default function Hero({ heroSrc }: Props) {
               Get in Touch
             </a>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:block">
         <div className="h-10 w-px bg-on-primary/20" />
