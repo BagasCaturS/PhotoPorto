@@ -7,6 +7,7 @@ import About from "@/components/About"
 import Contact from "@/components/Contact"
 import Footer from "@/components/Footer"
 import SocialLinks from "@/components/ui/social-links"
+import ScrollTimeline from "@/components/ScrollTimeline"
 import { fallbackPhotos, categories_all, type Photo } from "@/data/photos"
 import { createClient } from "@/lib/supabase/server"
 import { getProxiedUrl } from "@/lib/utils"
@@ -63,6 +64,7 @@ export default async function Home() {
           <Contact />
         </main>
       </InfiniteGridBackground>
+      <ScrollTimeline />
       <SocialLinks
         links={[
           { platform: "linkedin", href: "https://www.linkedin.com/in/web-bagascaturs/" },
