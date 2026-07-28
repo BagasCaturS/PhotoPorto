@@ -37,6 +37,9 @@ export default function ScrollTimeline() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
+  const sectionIdx = activeSection ? SECTIONS.findIndex((s) => s.label === activeSection) : -1
+  const mobileProgress = sectionIdx >= 0 ? ((sectionIdx + 0.5) / SECTIONS.length) * 100 : 0
+
   return (
     <>
       <div
@@ -83,7 +86,7 @@ export default function ScrollTimeline() {
         <div className="relative h-0.5 bg-border/30 dark:bg-dark-border/30">
           <div
             className="absolute top-0 left-0 h-full bg-accent dark:bg-dark-accent transition-all duration-150 ease-out"
-            style={{ width: `${progress * 100}%` }}
+            style={{ width: `${mobileProgress}%` }}
           />
           {SECTIONS.map((s, i) => (
             <div
