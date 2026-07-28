@@ -48,7 +48,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
   const filtered =
     activeCategory === "All"
       ? photos
-      : photos.filter((p) => p.category.toLowerCase() === activeCategory.toLowerCase())
+      : photos.filter((p) => (p.category || "").toLowerCase() === activeCategory.toLowerCase())
 
   const getGlobalIndex = useCallback(
     (localIndex: number) => {
