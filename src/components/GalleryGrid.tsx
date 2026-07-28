@@ -98,6 +98,7 @@ export default function GalleryGrid({ photos, categories }: GalleryGridProps) {
         </motion.div>
 
         <motion.div
+          key={activeCategory}
           className="columns-1 gap-6 sm:columns-2 lg:columns-3"
           variants={headingUp}
         >
