@@ -27,7 +27,7 @@ export default function InfiniteGridBackground({ children }: Props) {
     gridOffsetY.set((gridOffsetY.get() + 0.5) % 40)
   })
 
-  const maskImage = useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`
+  const clipPath = useMotionTemplate`circle(150px at ${mouseX}px ${mouseY}px)`
 
   return (
     <div ref={containerRef} onMouseMove={handleMouseMove} className="relative min-h-screen">
@@ -36,8 +36,8 @@ export default function InfiniteGridBackground({ children }: Props) {
           <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
         </div>
         <motion.div
-          className="absolute inset-0 opacity-35"
-          style={{ maskImage, WebkitMaskImage: maskImage }}
+          className="absolute inset-0 opacity-60"
+          style={{ clipPath, WebkitClipPath: clipPath }}
         >
           <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
         </motion.div>
