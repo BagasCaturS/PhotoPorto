@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
@@ -13,6 +13,14 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [allowed, setAllowed] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch("/api/auth/can-signup")
+      .then((r) => r.json())
+      .then((d) => setAllowed(d.allowed))
+      .catch(() => setAllowed(false))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,6 +34,27 @@ export default function SignupPage() {
       setSuccess(true)
     }
   }
+
+  if (allowed === false) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 dark:bg-dark-background">
+        <div className="w-full max-w-sm text-center">
+          <h1 className="font-sans text-3xl font-bold">Sign Up Disabled</h1>
+          <p className="mt-4 font-mono text-sm text-secondary dark:text-dark-secondary">
+            An admin account already exists. Sign up is no longer available.
+          </p>
+          <Link
+            href="/auth/login"
+            className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-foreground px-8 font-mono text-sm font-medium text-background dark:bg-dark-foreground dark:text-dark-background"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (allowed === null) return null
 
   if (success) {
     return (
