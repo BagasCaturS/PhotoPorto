@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
 
 export default function LoginPage() {
@@ -13,14 +12,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [canSignup, setCanSignup] = useState(false)
-
-  useEffect(() => {
-    fetch("/api/auth/can-signup")
-      .then((r) => r.json())
-      .then((d) => setCanSignup(d.allowed))
-      .catch(() => setCanSignup(false))
-  }, [])
 
   const redirectTo = searchParams.get("redirect") || "/admin"
 
@@ -98,17 +89,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {canSignup && (
-          <p className="mt-8 text-center font-mono text-sm text-secondary dark:text-dark-secondary">
-            Don&apos;t have an account?{" "}
-            <Link
-              href={`/auth/signup${redirectTo !== "/admin" ? `?redirect=${redirectTo}` : ""}`}
-              className="text-accent hover:underline"
-            >
-              Sign Up
-            </Link>
-          </p>
-        )}
+        
       </div>
     </div>
   )
