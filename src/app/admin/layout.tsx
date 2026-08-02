@@ -45,6 +45,7 @@ export default function AdminLayout({
               { label: "Photos", href: "/admin/photos" },
               { label: "Upload", href: "/admin/photos/upload" },
               { label: "Assign", href: "/admin/photos/manage" },
+              { label: "About", href: "/admin/about" },
               { label: "Journals", href: "/admin/journals" },
               { label: "Messages", href: "/admin/messages" },
             ].map((item) => (

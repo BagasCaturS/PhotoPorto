@@ -5,9 +5,21 @@ import Image from "next/image"
 import { GlowCard } from "@/components/ui/spotlight-card"
 import { Camera, Eye, Feather } from "lucide-react"
 
+const DEFAULT_PORTRAIT = "/photography/_DSF0109.webp"
+
 export default function About() {
   const ref = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
+  const [portraitSrc, setPortraitSrc] = useState(DEFAULT_PORTRAIT)
+
+  useEffect(() => {
+    fetch("/api/about")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.url) setPortraitSrc(d.url)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const el = ref.current
@@ -31,17 +43,17 @@ export default function About() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid items-center gap-16 lg:grid-cols-2">
             <div
-              className={`relative aspect-[4/5] overflow-hidden rounded-2xl transition-all duration-1000 ${
+              className={`relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted transition-all duration-1000 dark:bg-dark-muted ${
                 visible
                   ? "translate-x-0 opacity-100"
                   : "-translate-x-8 opacity-0"
               }`}
             >
               <Image
-                src="/photography/_DSF0109.webp"
+                src={portraitSrc}
                 alt="Photographer portrait"
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
